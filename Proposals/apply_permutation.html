@@ -1,0 +1,66 @@
+<h1 style="text-align: center;"><strong>Proposal for Additional Functions for Permutations</strong></h1>
+<p style="text-align: right;"><strong>Document number:&nbsp;</strong></p>
+<p style="text-align: right;"><strong>Date:&nbsp;</strong></p>
+<p style="text-align: right;"><strong>Project:&nbsp;</strong>Programming Language C++</p>
+<p style="text-align: right;"><strong>Reference:&nbsp;</strong>ISO/IEC IS 14882:2017(E)</p>
+<p style="text-align: right;"><strong>Reply to:</strong>&nbsp;Alexander Zaitsev</p>
+<p style="text-align: right;">zamazan4ik@tut.by</p>
+<p style="text-align: right;">&nbsp;</p>
+<h2 style="text-align: left;"><strong>Overview</strong></h2>
+<p>At the current time in the standard, we already have functions for working with permutations. But this set of functions is not enough for full-fledged work with permutations: <strong>is_permutation</strong>, <strong>next_permutation</strong>, <strong>prev_permutation</strong>.</p>
+<p>Quite often there are situations when you just need to rearrange the elements in some specific order. At this point, the developer will have to write this functionality manually.</p>
+<p>It is proposed to add two new functions: <strong>apply_permutation</strong>, <strong>apply_reverse_permutation</strong>.</p>
+<h2>Description</h2>
+<p>The algorithms transform the item sequence according to index sequence order.</p>
+<p>The routine <strong>apply_permutation</strong> takes a item sequence and a order sequence. It reshuffles item sequence according to order sequence. Every value in order sequence means where the item comes from. Order sequence needs to be exactly a permutation of the sequence [0, 1, ... , N], where N is the biggest index in the item sequence (zero-indexed).</p>
+<p><br />The routine <strong>apply_reverse_permutation</strong> takes a item sequence and a order sequence. It will reshuffle item sequence according to order sequence. Every value in order sequence means where the item goes to. Order sequence needs to be exactly a permutation of the sequence [0, 1, ... , N], where N is the biggest index in the item sequence (zero-indexed).</p>
+<h2><strong>Header &lt;algorithm&gt;</strong></h2>
+<p>namespace std</p>
+<p>{</p>
+<p>...</p>
+<p>template&lt;typename RandomAccessIterator1, typename RandomAccessIterator2&gt;<br />constexpr void apply_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end);</p>
+<p>template&lt;typename RandomAccessIterator1, typename RandomAccessIterator2&gt;<br />constexpr void apply_reverse_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end);</p>
+<p>...</p>
+<p>}</p>
+<h2><strong>Details</strong></h2>
+<p>template&lt;typename RandomAccessIterator1, typename RandomAccessIterator2&gt;<br />constexpr void <strong>apply_permutation</strong>(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end);</p>
+<p>Reorder item sequence with index sequence order.&nbsp;</p>
+<p>Order sequence must be zero-indexed.</p>
+<p>Item and order sequences get permuted.</p>
+<p>Works on empty sequences.</p>
+<p><strong>Parameters</strong>:</p>
+<p>item_begin&nbsp; -&nbsp; The start of the item sequence.</p>
+<p>item_end - One past the end of the item sequence.</p>
+<p>ind_begin - The start of the index sequence.</p>
+<p>item_end - One past the end of the index sequence.</p>
+<p><strong>Note</strong>: Item sequence size should be equal to index size. Otherwise behavior is undefined.</p>
+<p><strong>Complexity</strong>: O(N).</p>
+<p>&nbsp;</p>
+<p>template&lt;typename RandomAccessIterator1, typename RandomAccessIterator2&gt;<br />constexpr void <strong>apply_reverse_permutation</strong>(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end);</p>
+<p>Reorder item sequence with index sequence order.</p>
+<p>Order sequence must be zero-indexed.</p>
+<p>Item and order sequences get permuted.</p>
+<p>Works on empty sequences.</p>
+<p><strong>Parameters</strong>:</p>
+<p>item_begin&nbsp; -&nbsp; The start of the item sequence.</p>
+<p>item_end - One past the end of the item sequence.</p>
+<p>ind_begin - The start of the index sequence.</p>
+<p>item_end - One past the end of the index sequence.</p>
+<p><strong>Note</strong>: Item sequence size should be equal to index size. Otherwise behavior is undefined.</p>
+<p><strong>Complexity</strong>: O(N).</p>
+<h2>Iterator Requirements</h2>
+<p><strong>apply_permutation</strong> and <strong>apply_reverse_permutation</strong>&nbsp;work only on RandomAccess iterators. RandomAccess iterators required both for item and index sequences.</p>
+<h2>Exception Safety</h2>
+<p><strong>apply_permutation</strong>&nbsp;and <strong>apply_reverse_permutation</strong>&nbsp;take their parameters by iterators or reference, and do not depend upon any global state. Therefore, <strong>apply_permutation</strong>&nbsp;and <strong>apply_reverse_permutation</strong>&nbsp;provide the strong exception guarantee.</p>
+<h2><strong>Possible implementation</strong></h2>
+<p>template&lt;typename RandomAccessIterator1, typename RandomAccessIterator2&gt;<br />constexpr void apply_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end)<br />{<br />&nbsp; &nbsp; using Diff = typename std::iterator_traits&lt;RandomAccessIterator1&gt;::difference_type;<br />&nbsp; &nbsp; using std::swap;<br />&nbsp; &nbsp; Diff size = std::distance(item_begin, item_end);<br />&nbsp; &nbsp; for (Diff i = 0; i &lt; size; i++)<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; auto current = i;<br />&nbsp; &nbsp; &nbsp; &nbsp; while (i != ind_begin[current])<br />&nbsp; &nbsp; &nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; auto next = ind_begin[current];<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; swap(item_begin[current], item_begin[next]);<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ind_begin[current] = current;<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; current = next;<br />&nbsp; &nbsp; &nbsp; &nbsp; }<br />&nbsp; &nbsp; &nbsp; &nbsp; ind_begin[current] = current;<br />&nbsp; &nbsp; }<br />}</p>
+<p>template&lt;typename RandomAccessIterator1, typename RandomAccessIterator2&gt;<br />constexpr void apply_reverse_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end)<br />{<br />&nbsp; &nbsp; using Diff = typename std::iterator_traits&lt;RandomAccessIterator2&gt;::difference_type;<br />&nbsp; &nbsp; using std::swap;<br />&nbsp; &nbsp; Diff length = std::distance(item_begin, item_end);<br />&nbsp; &nbsp; for (Diff i = 0; i &lt; length; i++)<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; while (i != ind_begin[i])<br />&nbsp; &nbsp; &nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Diff next = ind_begin[i];<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; swap(item_begin[i], item_begin[next]);<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; swap(ind_begin[i], ind_begin[next]);<br />&nbsp; &nbsp; &nbsp; &nbsp; }<br />&nbsp; &nbsp; }<br />}</p>
+<h2>Example</h2>
+<p>#include &lt;vector&gt;<br />#include &lt;iostream&gt;</p>
+<p>#include &lt;algorithm&gt;</p>
+<p>int main ( int /*argc*/, char * /*argv*/ [] )<br />{<br /> {<br />&nbsp; &nbsp; std::cout &lt;&lt; "apply_permutation with iterators:\n";<br />&nbsp; &nbsp; std::vector&lt;int&gt; vec{1, 2, 3, 4, 5}, order{4, 2, 3, 1, 0};</p>
+<p>&nbsp; &nbsp; std::apply_permutation(vec.begin(), vec.end(), order.begin(), order.end());<br />&nbsp; &nbsp; for (const auto&amp; x : vec)<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; x &lt;&lt; ", ";<br />&nbsp; &nbsp; }<br />&nbsp; &nbsp; std::cout &lt;&lt; std::endl;<br /> }<br /> {<br />&nbsp; &nbsp; std::cout &lt;&lt; "apply_reverse_permutation with iterators:\n";<br />&nbsp; &nbsp; std::vector&lt;int&gt; vec{1, 2, 3, 4, 5}, order{4, 2, 3, 1, 0};</p>
+<p>&nbsp; &nbsp; std::apply_reverse_permutation(vec.begin(), vec.end(), order.begin(), order.end());<br />&nbsp; &nbsp; for (const auto&amp; x : vec)<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; x &lt;&lt; ", ";<br />&nbsp; &nbsp; }<br />&nbsp; &nbsp; std::cout &lt;&lt; std::endl;<br /> }<br /> return 0;<br />}</p>
+<h2>References</h2>
+<p><a href="https://github.com/boostorg/algorithm/blob/develop/include/boost/algorithm/apply_permutation.hpp">Boost.Algorithm</a> implementation</p>
+<p>Microsoft Developer "Old new thing" blog: <a href="https://blogs.msdn.microsoft.com/oldnewthing/20170102-00/?p=95095">1</a>, <a href="https://blogs.msdn.microsoft.com/oldnewthing/20170103-00/?p=95105">2</a>, <a href="https://blogs.msdn.microsoft.com/oldnewthing/20170104-00/?p=95115">3</a>, <a href="https://blogs.msdn.microsoft.com/oldnewthing/20170109-00/?p=95145">4</a>, <a href="https://blogs.msdn.microsoft.com/oldnewthing/20170110-00/?p=95155">5</a>, <a href="https://blogs.msdn.microsoft.com/oldnewthing/20170111-00/?p=95165">6</a></p>

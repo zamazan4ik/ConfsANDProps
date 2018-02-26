@@ -1,0 +1,18 @@
+<h1 style="text-align: center;"><strong>Proposal for Adding Hash Overload for std::complex</strong></h1>
+<p style="text-align: right;"><strong>Document number:&nbsp;</strong></p>
+<p style="text-align: right;"><strong>Date:&nbsp;</strong></p>
+<p style="text-align: right;"><strong>Project:&nbsp;</strong>Programming Language C++</p>
+<p style="text-align: right;"><strong>Reference:&nbsp;</strong>ISO/IEC IS 14882:2017(E)</p>
+<p style="text-align: right;"><strong>Reply to:</strong>&nbsp;Alexander Zaitsev</p>
+<p style="text-align: right;">zamazan4ik@tut.by</p>
+<p style="text-align: right;">&nbsp;</p>
+<h2 style="text-align: left;"><strong>Overview</strong></h2>
+<p>At the moment, the standard already has a class for working with complex numbers - std::complex. Unfortunately, at the moment it is rather difficult to use complex numbers with containers such as std::map/std::set, since the comparison operator&lt; for complex numbers is not defined. Also, because there is no predefined hash for complex numbers, it is not possible to easily use unordered containers (such as std::unordered_set/std::unordered_map). The operation is less for complex numbers in mathematics is not defined (so it's not so easy to decide to define operator&lt; purely for the operation of some standard containers. See reference to the discussion in Reference section), but for unordered containers we can determine the standard std::hash overload.</p>
+<p>This proposal suggests adding an std::hash overload to the C++ standard for std::complex.</p>
+<p>&nbsp;</p>
+<h2>Description</h2>
+<p>Since we have std::hash overload for float, double and long double we can write std::hash overload for std::complex, because inside this class we have, probably, two float/double/long double numbers.</p>
+<h2>Hash support</h2>
+<pre><span class="cppkeyword">template</span>&lt;typename T&gt; <span class="cppkeyword">struct</span> hash&lt;std::complex&lt;T&gt;&gt;;<br /><br />The specialization is enabled<br /><br /></pre>
+<h2>References</h2>
+<p><a href="https://groups.google.com/a/isocpp.org/forum/#!topic/std-discussion/_G0o9aibM04">Old discussion about <strong>operator&lt;()</strong> for std::complex</a></p>
