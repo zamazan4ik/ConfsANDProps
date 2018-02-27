@@ -1,18 +1,123 @@
-<h1 style="text-align: center;"><strong>Proposal for Adding Hash Overload for std::complex</strong></h1>
-<p style="text-align: right;"><strong>Document number:&nbsp;</strong></p>
-<p style="text-align: right;"><strong>Date:&nbsp;</strong></p>
-<p style="text-align: right;"><strong>Project:&nbsp;</strong>Programming Language C++</p>
-<p style="text-align: right;"><strong>Reference:&nbsp;</strong>ISO/IEC IS 14882:2017(E)</p>
-<p style="text-align: right;"><strong>Reply to:</strong>&nbsp;Alexander Zaitsev</p>
-<p style="text-align: right;">zamazan4ik@tut.by</p>
-<p style="text-align: right;">&nbsp;</p>
-<h2 style="text-align: left;"><strong>Overview</strong></h2>
-<p>At the moment, the standard already has a class for working with complex numbers - std::complex. Unfortunately, at the moment it is rather difficult to use complex numbers with containers such as std::map/std::set, since the comparison operator&lt; for complex numbers is not defined. Also, because there is no predefined hash for complex numbers, it is not possible to easily use unordered containers (such as std::unordered_set/std::unordered_map). The operation is less for complex numbers in mathematics is not defined (so it's not so easy to decide to define operator&lt; purely for the operation of some standard containers. See reference to the discussion in Reference section), but for unordered containers we can determine the standard std::hash overload.</p>
-<p>This proposal suggests adding an std::hash overload to the C++ standard for std::complex.</p>
-<p>&nbsp;</p>
-<h2>Description</h2>
-<p>Since we have std::hash overload for float, double and long double we can write std::hash overload for std::complex, because inside this class we have, probably, two float/double/long double numbers.</p>
-<h2>Hash support</h2>
-<pre><span class="cppkeyword">template</span>&lt;typename T&gt; <span class="cppkeyword">struct</span> hash&lt;std::complex&lt;T&gt;&gt;;<br /><br />The specialization is enabled<br /><br /></pre>
-<h2>References</h2>
-<p><a href="https://groups.google.com/a/isocpp.org/forum/#!topic/std-discussion/_G0o9aibM04">Old discussion about <strong>operator&lt;()</strong> for std::complex</a></p>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 5.4.5.1 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2018-02-27T02:29:05.715243517"/>
+	<style type="text/css">
+		h2.cjk { font-family: "WenQuanYi Micro Hei" }
+		h2.ctl { font-family: "Lohit Devanagari" }
+		pre.cjk { font-family: "WenQuanYi Micro Hei Mono", monospace }
+	</style>
+</head>
+<body lang="ru-RU" dir="ltr">
+<h1 align="center"><strong>Proposal for Adding </strong><strong>More</strong><strong>
+Hash Overload</strong><strong>s</strong></h1>
+<p align="right"><strong>Document number: </strong>
+</p>
+<p align="right"><strong>Date: </strong>
+</p>
+<p align="right"><strong>Project: </strong>Programming Language C++</p>
+<p align="right"><strong>Reference: </strong>ISO/IEC IS 14882:2017(E)</p>
+<p align="right"><strong>Reply to:</strong> Alexander Zaitsev</p>
+<p align="right">zamazan4ik@tut.by</p>
+<p align="right"> 
+</p>
+<h2 class="western" align="left"><strong>Overview</strong></h2>
+<p>At the moment, the standard already has a class for working with
+complex numbers - std::complex. Unfortunately, at the moment it is
+rather difficult to use complex numbers with containers such as
+std::map/std::set, since the comparison operator&lt; for complex
+numbers is not defined. Also, because there is no predefined hash for
+complex numbers, it is not possible to easily use unordered
+containers (such as std::unordered_set/std::unordered_map). The
+operation is less for complex numbers in mathematics is not defined
+(so it's not so easy to decide to define operator&lt; purely for the
+operation of some standard containers. See reference to the
+discussion in Reference section), but for unordered containers we can
+determine the standard std::hash overload.</p>
+<p>This proposal suggests adding an std::hash overloads for:
+std::pair, std::tuple, std::complex.</p>
+<h2 class="western">Hash support</h2>
+<pre class="western">
+template&lt;typename A, typename B&gt; 
+  struct hash&lt;std::pair&lt;A, B&gt;&gt;;
+template&lt;typename T&gt; 
+  struct hash&lt;std::complex&lt;T&gt;&gt;;
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::vector&lt;T, Allocator&gt;&gt;;
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::list&lt;T, Allocator&gt;&gt;;
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::forward_list&lt;T, Allocator&gt;&gt;;
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::deque&lt;T, Allocator&gt;&gt;;
+template&lt;typename Key, typename Compare, typename Allocator&gt; 
+  struct hash&lt;std::set&lt;Key, Compare, Allocator&gt;&gt;;
+template&lt;typename Key, typename Compare, typename Allocator&gt; 
+  struct hash&lt;std::multiset&lt;Key, Compare, Allocator&gt;&gt;;
+template&lt;typename Key, typename T, typename Compare, typename Allocator&gt; 
+  struct hash&lt;std::map&lt;Key, T, Compare, Allocator&gt;&gt;;
+template&lt;typename Key, typename T, typename Compare, typename Allocator&gt; 
+  struct hash&lt;std::multimap&lt;Key, T, Compare, Allocator&gt;&gt;;
+template&lt;typename T&gt; 
+  struct hash&lt;std::complex&lt;T&gt;&gt;;
+template&lt;typename T, std::size_t N&gt; 
+  struct hash&lt;std::array&lt;T, N&gt;&gt;;
+template&lt;typename... T&gt; 
+  struct hash&lt;std::tuple&lt;T...&gt;&gt;;
+</pre><h2 class="western">
+Details</h2>
+<pre class="western">template&lt;typename A, typename B&gt; 
+  struct hash&lt;std::pair&lt;A, B&gt;&gt;;
+
+The template specialization of std::hash for the std::pair template allows users to obtain hashes of pair objects.
+
+The specialization std::hash&lt;std::pair&lt;A, B&gt;&gt; is enabled (see std::hash) if specializations std::hash&lt;std::remove_const_t&lt;A&gt;&gt; and std::hash&lt;std::remove_const_t&lt;B&gt;&gt; are enabled both, and is disabled otherwise.
+
+
+template&lt;typename T&gt; 
+  struct hash&lt;std::complex&lt;T&gt;&gt;;
+
+The template specialization of std::hash for the std::complex template allows users to obtain hashes of std::complex objects.
+
+The specialization std::hash&lt;std::complex&lt;T&gt;&gt; is enabled.
+
+
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::vector&lt;T, Allocator&gt;&gt;;
+
+The template specialization of std::hash for the std::vector template allows users to obtain hashes of vector objects.
+
+The specialization std::hash&lt;std::vector&lt;T, Allocator&gt;&gt; is enabled (see std::hash) if specializations std::hash&lt;std::remove_const_t&lt;T&gt;&gt; is enabled, and is disabled otherwise.
+
+
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::list&lt;T, Allocator&gt;&gt;;
+
+The template specialization of std::hash for the std::vector template allows users to obtain hashes of list objects.
+
+The specialization std::hash&lt;std::list&lt;T, Allocator&gt;&gt; is enabled (see std::hash) if specializations std::hash&lt;std::remove_const_t&lt;T&gt;&gt; is enabled, and is disabled otherwise.
+
+
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::forward_list&lt;T, Allocator&gt;&gt;;
+
+The template specialization of std::hash for the std::vector template allows users to obtain hashes of forward_list objects.
+
+The specialization std::hash&lt;std::forward_list&lt;T, Allocator&gt;&gt; is enabled (see std::hash) if specializations std::hash&lt;std::remove_const_t&lt;T&gt;&gt; is enabled, and is disabled otherwise.
+
+
+template&lt;typename T, typename Allocator&gt; 
+  struct hash&lt;std::deque&lt;T, Allocator&gt;&gt;;
+
+The template specialization of std::hash for the std::vector template allows users to obtain hashes of deque objects.
+
+The specialization std::hash&lt;std::deque&lt;T, Allocator&gt;&gt; is enabled (see std::hash) if specializations std::hash&lt;std::remove_const_t&lt;T&gt;&gt; is enabled, and is disabled otherwise.</pre><h2 class="western">
+References</h2>
+<p><a href="https://groups.google.com/a/isocpp.org/forum/#!topic/std-discussion/_G0o9aibM04">Old
+discussion about <strong>operator&lt;()</strong> for std::complex</a></p>
+</body>
+</html>
