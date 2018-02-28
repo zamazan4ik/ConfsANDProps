@@ -5,7 +5,7 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 5.4.5.1 (Linux)"/>
 	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="2018-02-28T08:19:32.384704085"/>
+	<meta name="changed" content="2018-02-28T08:37:39.351529114"/>
 	<style type="text/css">
 		h2.cjk { font-family: "WenQuanYi Micro Hei" }
 		h2.ctl { font-family: "Lohit Devanagari" }
@@ -524,7 +524,10 @@ template&lt;typename T&gt; constexpr quaternion&lt;T&gt; operator - (std::comple
 template&lt;typename T&gt; constexpr quaternion&lt;T&gt; operator - (quaternion&lt;T&gt; const &amp; lhs, std::complex&lt;T&gt; const &amp; rhs);
 template&lt;typename T&gt; constexpr quaternion&lt;T&gt; operator - (quaternion&lt;T&gt; const &amp; lhs, quaternion&lt;T&gt; const &amp; rhs);</pre><p>
 These operators return&nbsp;<code class="western">quaternion&lt;T&gt;(lhs)&nbsp;-=&nbsp;rhs</code>.</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western">template&lt;typename T&gt; constexpr quaternion&lt;T&gt; operator * (T const &amp; lhs, quaternion&lt;T&gt; const &amp; rhs);
 template&lt;typename T&gt; constexpr quaternion&lt;T&gt; operator * (quaternion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
 template&lt;typename T&gt; constexpr quaternion&lt;T&gt; operator * (std::complex&lt;T&gt; const &amp; lhs, quaternion&lt;T&gt; const &amp; rhs);
@@ -603,24 +606,42 @@ std::basic_ostream&lt;charT,traits&gt;&amp; operator &lt;&lt; (
 }
 template&lt;typename T&gt; quaternion&lt;T&gt; exp(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the exponential of the quaternion.</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  cos(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the cosine of the quaternion</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  sin(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the sine of the quaternion.</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  tan(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the tangent of the quaternion.</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  cosh(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the hyperbolic cosine of the quaternion.</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  sinh(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the hyperbolic sine of the quaternion.</p>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  tanh(quaternion&lt;T&gt; const &amp; q);</pre><p>
 Computes the hyperbolic tangent of the quaternion.</p>
-<h5 class="western">&nbsp;</h5>
+<h5 class="western"><br/>
+<br/>
+
+</h5>
 <pre class="western" style="margin-bottom: 0.5cm">template&lt;typename T&gt; quaternion&lt;T&gt;  pow(quaternion&lt;T&gt; const &amp; q, int n);</pre><p>
 Computes the n-th power of the quaternion q.</p>
 <h2 class="western">Quaternion Creation Functions</h2>
@@ -687,6 +708,19 @@ and here for&nbsp;<a href="http://www.boost.org/doc/libs/1_66_0/libs/math/exampl
 test file</a>).</p>
 <h2 class="western">Exception Safety</h2>
 <h2 class="western">Hash</h2>
+<pre class="western" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal"><font color="#000000"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">template&lt;typename</span> <span lang="en-US">T&gt; </span></font></font></font>
+<font color="#000000">  <font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US"><span style="font-style: normal"><span style="font-weight: normal">struct hash&lt;std::</span></span></span></font></font><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US"><span style="font-style: normal"><span style="font-weight: normal">quaternion</span></span></span></font></font><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US"><span style="font-style: normal"><span style="font-weight: normal">&lt;T&gt;&gt;;</span></span></span></font></font></font></pre><p>
+<br/>
+<br/>
+
+</p>
+<pre lang="en-US" class="western" style="font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal"><font color="#000000"><font face="Courier New"><font size="2" style="font-size: 10pt">The template specialization of std::hash for the std::quaternion template allows users to obtain hashes of quaternions objects.</font></font></font>
+
+<font color="#000000"><font face="Courier New"><font size="2" style="font-size: 10pt"><span lang="en-US">The specialization std::hash&lt;std::quaternion&lt;T&gt;&gt; is enabled (see std::hash) if specializations std::hash&lt;std::remove_const_t&lt;T&gt;&gt; is enabled, and is disabled otherwise.</span></font></font></font></pre><p>
+<br/>
+<br/>
+
+</p>
 <h2 class="western"><strong>Possible implementation</strong></h2>
 <p>See <a href="http://www.boost.org/doc/libs/1_66_0/boost/math/quaternion.hpp">Boost.Math</a>
 implementation.</p>
@@ -694,6 +728,6 @@ implementation.</p>
 <p><a href="http://www.boost.org/doc/libs/1_66_0/libs/math/doc/html/quaternions.html">Boost.Math</a>
 documentation.</p>
 <h2 class="western">Open issues</h2>
-<p>1) Should be added or not support for&nbsp;</p>
+<p>1) Should be added or not support for bi-quaternions</p>
 </body>
 </html>
