@@ -1,76 +1,256 @@
-<h1 style="text-align: center;"><strong>Proposal for Additional Partition Function</strong></h1>
-<p style="text-align: right;"><strong>Document number:&nbsp;</strong></p>
-<p style="text-align: right;"><strong>Date:&nbsp;</strong></p>
-<p style="text-align: right;"><strong>Project:&nbsp;</strong>Programming Language C++</p>
-<p style="text-align: right;"><strong>Reference:&nbsp;</strong>ISO/IEC IS 14882:2017(E)</p>
-<p style="text-align: right;"><strong>Reply to:</strong>&nbsp;Alexander Zaitsev</p>
-<p style="text-align: right;">zamazan4ik@tut.by</p>
-<p style="text-align: right;">&nbsp;</p>
-<h2 style="text-align: left;"><strong>Overview</strong></h2>
-<p>At the current time in the standard, we already have functions for working with partitions. There is <strong>is_partitioned&nbsp;</strong>function, but unfortunately this function return not enough information about tested range. E.g. if tested sequence isn't partitioned, <strong>is_partitioned&nbsp;</strong>return false. But sometimes we need information about the place where the condition was violated.</p>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 5.4.6.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2018-03-26T19:24:15.279755882"/>
+	<style type="text/css">
+		h2.cjk { font-family: "WenQuanYi Micro Hei" }
+		h2.ctl { font-family: "Lohit Devanagari" }
+		h4.cjk { font-family: "WenQuanYi Micro Hei" }
+		h4.ctl { font-family: "Lohit Devanagari" }
+		code.cjk { font-family: "WenQuanYi Micro Hei Mono", monospace }
+	</style>
+</head>
+<body lang="ru-RU" dir="ltr">
+<h1 align="center"><strong>Proposal for Additional Partition Function</strong></h1>
+<p align="right"><strong>Document number:&nbsp;</strong></p>
+<p align="right"><strong>Date:&nbsp;</strong></p>
+<p align="right"><strong>Project:&nbsp;</strong>Programming Language
+C++</p>
+<p align="right"><strong>Reference:&nbsp;</strong>ISO/IEC IS
+14882:2017(E)</p>
+<p align="right"><strong>Reply to:</strong>&nbsp;Alexander Zaitsev</p>
+<p align="right">zamazan4ik@tut.by</p>
+<p align="right">&nbsp;</p>
+<h2 class="western" align="left"><strong>Overview</strong></h2>
+<p>At the current time in the standard, we already have functions for
+working with partitions. There is <strong>is_partitioned&nbsp;</strong>function,
+but unfortunately this function return not enough information about
+tested range. E.g. if tested sequence isn't partitioned,
+<strong>is_partitioned&nbsp;</strong>return false. But sometimes we
+need information about the place where the condition was violated.
+E.g. we want to delete from a container all elements that violate the
+partitioning.</p>
 <p>It is proposed to add one new function: <strong>is_partitioned_until</strong>.</p>
 <p>&nbsp;</p>
-<h2><strong>Header &lt;algorithm&gt;</strong></h2>
+<h2 class="western"><strong>Header &lt;algorithm&gt;</strong></h2>
 <p>namespace std</p>
 <p>{</p>
 <p>...</p>
 <p>template&lt;typename InputIterator, typename UnaryPredicate&gt;</p>
-<p>constexpr InputIterator <strong>is_partitioned_until</strong>( InputIterator first, InputIterator last, UnaryPredicate p );</p>
-<p><span class="kw1">template</span><span class="sy1">&lt;</span> typename&nbsp;ExecutionPolicy, typename&nbsp;ForwardIt, typename&nbsp;UnaryPredicate&nbsp;<span class="sy1">&gt;</span><br />ForwardIt <strong>is_partitioned_until</strong><span class="br0">(</span>&nbsp;ExecutionPolicy<span class="sy3">&amp;&amp;</span>&nbsp;policy, ForwardIt first, ForwardIt last, UnaryPredicate p&nbsp;<span class="br0">)</span><span class="sy4">;</span></p>
+<p>constexpr InputIterator <strong>is_partitioned_until</strong>(
+InputIterator first, InputIterator last, UnaryPredicate p );</p>
+<p>template&lt; typename&nbsp;ExecutionPolicy, typename&nbsp;ForwardIt,
+typename&nbsp;UnaryPredicate&nbsp;&gt;<br/>
+ForwardIt
+<strong>is_partitioned_until</strong>(&nbsp;ExecutionPolicy&amp;&amp;&nbsp;policy,
+ForwardIt first, ForwardIt last, UnaryPredicate p&nbsp;);</p>
 <p>...</p>
 <p>}</p>
-<h2><strong>Details</strong></h2>
+<h2 class="western"><strong>Details</strong></h2>
 <p>template&lt;typename InputIterator, typename UnaryPredicate&gt;</p>
-<p>constexpr InputIterator <strong>is_partitioned_until</strong>( InputIterator first, InputIterator last, UnaryPredicate p );</p>
-<p>The algorithm tests to see if a sequence is partitioned according to a predicate; in other words, all the items in the sequence that satisfy the predicate are at the beginning of the sequence.</p>
-<p>This routine takes a sequence and a predicate. It returns the last iterator 'it' in the sequence [begin, end) for which the <strong>is_partitioned</strong>(begin, it) is true.</p>
+<p>constexpr InputIterator <strong>is_partitioned_until</strong>(
+InputIterator first, InputIterator last, UnaryPredicate p );</p>
+<p>The algorithm tests to see if a sequence is partitioned according
+to a predicate; in other words, all the items in the sequence that
+satisfy the predicate are at the beginning of the sequence.</p>
+<p>This routine takes a sequence and a predicate. It returns the last
+iterator 'it' in the sequence [begin, end) for which the
+<strong>is_partitioned</strong>(begin, it) is true.</p>
 <p>&nbsp;</p>
 <p><strong>Parameters</strong>:</p>
 <p>first -&nbsp; The start of the input sequence.</p>
 <p>last - One past the end of the input sequence.</p>
-<p>p - unary predicate which returns ​<span class="t-c"><span class="mw-geshi cpp source-cpp"><span class="kw2">true</span></span></span>&nbsp;for the elements expected to be found in the beginning of the range.&nbsp;</p>
-<p>The signature of the predicate function should be equivalent to the following:</p>
-<p><span class="t-cc"><span class="mw-geshi cpp source-cpp"><span class="kw4">bool</span>&nbsp;pred<span class="br0">(</span><span class="kw4">const</span>&nbsp;Type&nbsp;<span class="sy3">&amp;</span>a<span class="br0">)</span><span class="sy4">;</span></span></span></p>
-<p>The signature does not need to have&nbsp;<span class="t-c"><span class="mw-geshi cpp source-cpp"><span class="kw4">const</span>&nbsp;<span class="sy3">&amp;</span></span></span>, but the function must not modify the objects passed to it.<br />The type&nbsp;<span class="t-c"><span class="mw-geshi cpp source-cpp">Type</span></span>&nbsp;must be such that an object of type InputIterator can be dereferenced and then implicitly converted to&nbsp;<span class="t-c"><span class="mw-geshi cpp source-cpp">Type</span></span>. ​</p>
-<p><strong>Note</strong>: returns iterator to the end for empty and single-element ranges, no matter what predicate is passed to test against.</p>
-<p><strong>Complexity</strong>: At most&nbsp;<code>std::distance(first, last)</code>&nbsp;applications of&nbsp;<code>p</code>.; that is, it compare against each element in the list once. If the sequence is found to be not partitioned at any point, the routine will terminate immediately, without examining the rest of the elements.</p>
+<p>p - unary predicate which returns ​true&nbsp;for the elements
+expected to be found in the beginning of the range.&nbsp;</p>
+<p>The signature of the predicate function should be equivalent to
+the following:</p>
+<p>bool&nbsp;pred(const&nbsp;Type&nbsp;&amp;a);</p>
+<p>The signature does not need to have&nbsp;const&nbsp;&amp;, but the
+function must not modify the objects passed to it.<br/>
+The
+type&nbsp;Type&nbsp;must be such that an object of type InputIterator
+can be dereferenced and then implicitly converted to&nbsp;Type. ​</p>
+<p><strong>Note</strong>: returns iterator to the end for empty and
+single-element ranges, no matter what predicate is passed to test
+against.</p>
+<p><strong>Complexity</strong>: At most&nbsp;<code class="western">std::distance(first,
+last)</code>&nbsp;applications of&nbsp;<code class="western">p</code>.;
+that is, it compare against each element in the list once. If the
+sequence is found to be not partitioned at any point, the routine
+will terminate immediately, without examining the rest of the
+elements.</p>
 <p><strong>Exception:</strong></p>
-<p>Takes parameters by value or const reference, and do not depend upon any global state. Therefore, provides the strong exception guarantee.&nbsp;</p>
-<h4>Iterator Requirements:</h4>
+<p>Takes parameters by value or const reference, and do not depend
+upon any global state. Therefore, provides the strong exception
+guarantee.&nbsp;</p>
+<h4 class="western">Iterator Requirements:</h4>
 <p>Works on all iterators except output iterators.</p>
 <p>&nbsp;</p>
-<p><span class="kw1">template</span><span class="sy1">&lt;</span> typename&nbsp;ExecutionPolicy, typename&nbsp;ForwardIt, typename&nbsp;UnaryPredicate&nbsp;<span class="sy1">&gt;</span><br />ForwardIt <strong>is_partitioned_until</strong><span class="br0">(</span>&nbsp;ExecutionPolicy<span class="sy3">&amp;&amp;</span>&nbsp;policy, ForwardIt first, ForwardIt last, UnaryPredicate p&nbsp;<span class="br0">)</span><span class="sy4">;</span></p>
-<p>The algorithm tests to see if a sequence is partitioned according to a predicate; in other words, all the items in the sequence that satisfy the predicate are at the beginning of the sequence.</p>
-<p>This routine takes an execution policy, a sequence and a predicate. It returns the last iterator 'it' in the sequence [begin, end) for which the <strong>is_partitioned</strong>(begin, it) is true.</p>
+<p>template&lt; typename&nbsp;ExecutionPolicy, typename&nbsp;ForwardIt,
+typename&nbsp;UnaryPredicate&nbsp;&gt;<br/>
+ForwardIt
+<strong>is_partitioned_until</strong>(&nbsp;ExecutionPolicy&amp;&amp;&nbsp;policy,
+ForwardIt first, ForwardIt last, UnaryPredicate p&nbsp;);</p>
+<p>The algorithm tests to see if a sequence is partitioned according
+to a predicate; in other words, all the items in the sequence that
+satisfy the predicate are at the beginning of the sequence.</p>
+<p>This routine takes an execution policy, a sequence and a
+predicate. It returns the last iterator 'it' in the sequence [begin,
+end) for which the <strong>is_partitioned</strong>(begin, it) is
+true.</p>
 <p><strong>Parameters</strong>:</p>
 <p>policy - An execution policy.</p>
 <p>first -&nbsp; The start of the input sequence.</p>
 <p>last - One past the end of the input sequence.</p>
-<p>p - unary predicate which returns ​<span class="t-c"><span class="mw-geshi cpp source-cpp"><span class="kw2">true</span></span></span>&nbsp;for the elements expected to be found in the beginning of the range.&nbsp;</p>
-<p>The signature of the predicate function should be equivalent to the following:</p>
-<p><span class="t-cc"><span class="mw-geshi cpp source-cpp"><span class="kw4">bool</span>&nbsp;pred<span class="br0">(</span><span class="kw4">const</span>&nbsp;Type&nbsp;<span class="sy3">&amp;</span>a<span class="br0">)</span><span class="sy4">;</span></span></span></p>
-<p>The signature does not need to have&nbsp;<span class="t-c"><span class="mw-geshi cpp source-cpp"><span class="kw4">const</span>&nbsp;<span class="sy3">&amp;</span></span></span>, but the function must not modify the objects passed to it.<br />The type&nbsp;<span class="t-c"><span class="mw-geshi cpp source-cpp">Type</span></span>&nbsp;must be such that an object of type ForwardIt&nbsp;can be dereferenced and then implicitly converted to&nbsp;<span class="t-c"><span class="mw-geshi cpp source-cpp">Type</span></span>. ​</p>
-<p><strong>Note</strong>: returns iterator to the end for empty and single-element ranges, no matter what predicate is passed to test against.</p>
-<p><strong>Complexity</strong>: At most&nbsp;<code>std::distance(first, last)</code>&nbsp;applications of&nbsp;<code>p</code>.; that is, it compare against each element in the list once. If the sequence is found to be not partitioned at any point, the routine will terminate immediately, without examining the rest of the elements.</p>
+<p>p - unary predicate which returns ​true&nbsp;for the elements
+expected to be found in the beginning of the range.&nbsp;</p>
+<p>The signature of the predicate function should be equivalent to
+the following:</p>
+<p>bool&nbsp;pred(const&nbsp;Type&nbsp;&amp;a);</p>
+<p>The signature does not need to have&nbsp;const&nbsp;&amp;, but the
+function must not modify the objects passed to it.<br/>
+The
+type&nbsp;Type&nbsp;must be such that an object of type ForwardIt&nbsp;can
+be dereferenced and then implicitly converted to&nbsp;Type. ​</p>
+<p><strong>Note</strong>: returns iterator to the end for empty and
+single-element ranges, no matter what predicate is passed to test
+against.</p>
+<p><strong>Complexity</strong>: At most&nbsp;<code class="western">std::distance(first,
+last)</code>&nbsp;applications of&nbsp;<code class="western">p</code>.;
+that is, it compare against each element in the list once. If the
+sequence is found to be not partitioned at any point, the routine
+will terminate immediately, without examining the rest of the
+elements.</p>
 <p><strong>Exception:</strong></p>
-<p>The overload with a template parameter named&nbsp;<code>ExecutionPolicy</code>&nbsp;reports errors as follows:</p>
+<p>The overload with a template parameter
+named&nbsp;<code class="western">ExecutionPolicy</code>&nbsp;reports
+errors as follows:</p>
 <ul>
-<li>If execution of a function invoked as part of the algorithm throws an exception and&nbsp;<code>ExecutionPolicy</code>&nbsp;is one of the three&nbsp;<a title="cpp/algorithm/execution policy tag t" href="http://en.cppreference.com/w/cpp/algorithm/execution_policy_tag_t">standard policies</a>,&nbsp;<span class="t-lc"><a title="cpp/error/terminate" href="http://en.cppreference.com/w/cpp/error/terminate">std::terminate</a></span>&nbsp;is called. For any other&nbsp;<code>ExecutionPolicy</code>, the behavior is implementation-defined.</li>
-<li>If the algorithm fails to allocate memory,&nbsp;<span class="t-lc"><a title="cpp/memory/new/bad alloc" href="http://en.cppreference.com/w/cpp/memory/new/bad_alloc">std::bad_alloc</a></span>&nbsp;is thrown.</li>
+	<li/>
+<p style="margin-bottom: 0cm">If execution of a function
+	invoked as part of the algorithm throws an exception
+	and&nbsp;<code class="western">ExecutionPolicy</code>&nbsp;is one of
+	the three&nbsp;<a href="http://en.cppreference.com/w/cpp/algorithm/execution_policy_tag_t">standard
+	policies</a>,&nbsp;<a href="http://en.cppreference.com/w/cpp/error/terminate">std::terminate</a>&nbsp;is
+	called. For any other&nbsp;<code class="western">ExecutionPolicy</code>,
+	the behavior is implementation-defined. 
+	</p>
+	<li/>
+<p>If the algorithm fails to allocate
+	memory,&nbsp;<a href="http://en.cppreference.com/w/cpp/memory/new/bad_alloc">std::bad_alloc</a>&nbsp;is
+	thrown. 
+	</p>
 </ul>
 <p>&nbsp;</p>
-<h4>Iterator Requirements:</h4>
+<h4 class="western">Iterator Requirements:</h4>
 <p>Works on all iterators except input and output iterators.</p>
-<h2><strong>Possible implementation</strong></h2>
-<p>template &lt;typename InputIterator, typename UnaryPredicate&gt;<br />InputIterator is_partitioned_until ( InputIterator first, InputIterator last, UnaryPredicate p )<br />{<br />&nbsp; &nbsp; // Run through the part that satisfy the predicate<br />&nbsp; &nbsp; for ( ; first != last; ++first )<br />&nbsp; &nbsp; &nbsp; &nbsp; if ( !p (*first))<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; break;<br />&nbsp; &nbsp; // Now the part that does not satisfy the predicate<br />&nbsp; &nbsp; for ( ; first != last; ++first )<br />&nbsp; &nbsp; &nbsp; &nbsp; if ( p (*first))<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return first;<br />&nbsp; &nbsp; return last;<br />}</p>
-<h2>Example</h2>
-<p>#include &lt;vector&gt;<br />#include &lt;functional&gt;<br />#include &lt;iostream&gt;</p>
+<h2 class="western"><strong>Possible implementation</strong></h2>
+<p>template &lt;typename InputIterator, typename
+UnaryPredicate&gt;<br/>
+InputIterator is_partitioned_until (
+InputIterator first, InputIterator last, UnaryPredicate p )<br/>
+{<br/>
+&nbsp;
+&nbsp; // Run through the part that satisfy the predicate<br/>
+&nbsp;
+&nbsp; for ( ; first != last; ++first )<br/>
+&nbsp; &nbsp; &nbsp; &nbsp;
+if ( !p (*first))<br/>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+break;<br/>
+&nbsp; &nbsp; // Now the part that does not satisfy the
+predicate<br/>
+&nbsp; &nbsp; for ( ; first != last; ++first )<br/>
+&nbsp;
+&nbsp; &nbsp; &nbsp; if ( p (*first))<br/>
+&nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; return first;<br/>
+&nbsp; &nbsp; return last;<br/>
+}</p>
+<h2 class="western">Example</h2>
+<p>#include &lt;vector&gt;<br/>
+#include &lt;functional&gt;<br/>
+#include
+&lt;iostream&gt;</p>
 <p>#include &lt;algorithm&gt;</p>
-<p>bool isOdd(const int v1)<br />{<br />&nbsp; &nbsp; return v1 % 2 != 0;<br />}</p>
-<p>struct isOddComp<br />{<br />&nbsp; &nbsp; bool operator()(const int v1) const<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; return v1 % 2 != 0;<br />&nbsp; &nbsp; }<br />};</p>
-<p><br />int main ( int /*argc*/, char * /*argv*/ [] )<br />{<br />&nbsp; &nbsp; std::vector&lt;int&gt; good({1, 2, 4});<br />&nbsp; &nbsp; std::vector&lt;int&gt; bad({1, 2, 3});</p>
-<p>&nbsp; &nbsp; // Use custom function<br />&nbsp; &nbsp; auto it1 = ba::is_partitioned_until(good.begin(), good.end(), isOdd);<br />&nbsp; &nbsp; if(it1 == good.end())<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; "The sequence is partitioned\n";<br />&nbsp; &nbsp; }<br />&nbsp; &nbsp; else<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; "is_partitioned_until check failed here: " &lt;&lt; *it1 &lt;&lt; std::endl;<br />&nbsp; &nbsp; }</p>
-<p>&nbsp; &nbsp; // Use custom comparator<br />&nbsp; &nbsp; auto it2 = ba::is_partitioned_until(good.begin(), good.end(), isOddComp());<br />&nbsp; &nbsp; if(it2 == good.end())<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; "The sequence is partitioned\n";<br />&nbsp; &nbsp; }<br />&nbsp; &nbsp; else<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; "is_partitioned_until check failed here: " &lt;&lt; *it2 &lt;&lt; std::endl;<br />&nbsp; &nbsp; }</p>
-<p>&nbsp; &nbsp; auto it3 = ba::is_partitioned_until(bad, isOdd);<br />&nbsp; &nbsp; if(it3 == bad.end())<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; "The sequence is partitioned\n";<br />&nbsp; &nbsp; }<br />&nbsp; &nbsp; else<br />&nbsp; &nbsp; {<br />&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt; "is_partitioned_until check failed here: " &lt;&lt; *it3 &lt;&lt; std::endl;<br />&nbsp; &nbsp; }<br />&nbsp; &nbsp; return 0;<br />}</p>
-<h2>References</h2>
-<p><a href="https://github.com/boostorg/algorithm/blob/develop/include/boost/algorithm/is_partitioned_until.hpp">Boost.Algorithm</a> implementation</p>
+<p>bool isOdd(const int v1)<br/>
+{<br/>
+&nbsp; &nbsp; return v1 % 2
+!= 0;<br/>
+}</p>
+<p>struct isOddComp<br/>
+{<br/>
+&nbsp; &nbsp; bool operator()(const
+int v1) const<br/>
+&nbsp; &nbsp; {<br/>
+&nbsp; &nbsp; &nbsp; &nbsp;
+return v1 % 2 != 0;<br/>
+&nbsp; &nbsp; }<br/>
+};</p>
+<p><br/>
+int main ( int /*argc*/, char * /*argv*/ [] )<br/>
+{<br/>
+&nbsp;
+&nbsp; std::vector&lt;int&gt; good({1, 2, 4});<br/>
+&nbsp; &nbsp;
+std::vector&lt;int&gt; bad({1, 2, 3});</p>
+<p>&nbsp; &nbsp; // Use custom function<br/>
+&nbsp; &nbsp; auto it1 =
+ba::is_partitioned_until(good.begin(), good.end(), isOdd);<br/>
+&nbsp;
+&nbsp; if(it1 == good.end())<br/>
+&nbsp; &nbsp; {<br/>
+&nbsp; &nbsp;
+&nbsp; &nbsp; std::cout &lt;&lt; &quot;The sequence is
+partitioned\n&quot;;<br/>
+&nbsp; &nbsp; }<br/>
+&nbsp; &nbsp; else<br/>
+&nbsp;
+&nbsp; {<br/>
+&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt;
+&quot;is_partitioned_until check failed here: &quot; &lt;&lt; *it1 &lt;&lt;
+std::endl;<br/>
+&nbsp; &nbsp; }</p>
+<p>&nbsp; &nbsp; // Use custom comparator<br/>
+&nbsp; &nbsp; auto it2
+= ba::is_partitioned_until(good.begin(), good.end(), isOddComp());<br/>
+&nbsp;
+&nbsp; if(it2 == good.end())<br/>
+&nbsp; &nbsp; {<br/>
+&nbsp; &nbsp;
+&nbsp; &nbsp; std::cout &lt;&lt; &quot;The sequence is
+partitioned\n&quot;;<br/>
+&nbsp; &nbsp; }<br/>
+&nbsp; &nbsp; else<br/>
+&nbsp;
+&nbsp; {<br/>
+&nbsp; &nbsp; &nbsp; &nbsp; std::cout &lt;&lt;
+&quot;is_partitioned_until check failed here: &quot; &lt;&lt; *it2 &lt;&lt;
+std::endl;<br/>
+&nbsp; &nbsp; }</p>
+<p>&nbsp; &nbsp; auto it3 = ba::is_partitioned_until(bad, isOdd);<br/>
+&nbsp;
+&nbsp; if(it3 == bad.end())<br/>
+&nbsp; &nbsp; {<br/>
+&nbsp; &nbsp; &nbsp;
+&nbsp; std::cout &lt;&lt; &quot;The sequence is partitioned\n&quot;;<br/>
+&nbsp;
+&nbsp; }<br/>
+&nbsp; &nbsp; else<br/>
+&nbsp; &nbsp; {<br/>
+&nbsp; &nbsp;
+&nbsp; &nbsp; std::cout &lt;&lt; &quot;is_partitioned_until check
+failed here: &quot; &lt;&lt; *it3 &lt;&lt; std::endl;<br/>
+&nbsp; &nbsp;
+}<br/>
+&nbsp; &nbsp; return 0;<br/>
+}</p>
+<h2 class="western">References</h2>
+<p><a href="https://github.com/boostorg/algorithm/blob/develop/include/boost/algorithm/is_partitioned_until.hpp">Boost.Algorithm</a>
+implementation</p>
+</body>
+</html>
