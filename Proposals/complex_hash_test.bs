@@ -27,7 +27,7 @@ template<typename A, typename B>
   struct hash<pair<A, B>>;
 ```  
  
-Enabled if specializations `hash<std::remove_const_t<A>>` and `hash<std::remove_const_t<B>>` are enabled both, and is disabled otherwise.
+Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are enabled both, and is disabled otherwise.
 
 
 Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:
@@ -37,7 +37,7 @@ template<typename... T>
   struct hash<tuple<T...>>;
 ```  
  
-Enabled if specialization `hash<std::remove_const_t<U>>` is enabled for every template argument `U` in the parameter pack, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<U>>` is enabled for every template argument `U` in the parameter pack, and disabled otherwise.
 
 
 Add a new Section "21.3.7.7, Hash support [array.hash]", with following content:
@@ -47,7 +47,7 @@ template<typename T, std::size_t N>
   struct hash<array<T, N>>;
 ```  
  
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.
 
 
 Add a new Section "21.3.8.6, Hash support [deque.hash]", with following content:
@@ -60,7 +60,7 @@ template<typename T>
   struct hash<pmr::deque<T>>;
 ```  
   
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.
 
 
 Add a new Section "21.3.9.8, Hash support [forward_list.hash]", with following content:
@@ -73,7 +73,7 @@ template<typename T>
   struct hash<pmr::forward_list<T>>;
 ```
 
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.
 
 
 Add a new Section "21.3.10.7, Hash support [list.hash]", with following content:
@@ -86,7 +86,7 @@ template<typename T>
   struct hash<pmr::list<T>>;  
 ```
 
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.
 
 
 Add a new Section "21.3.11.7, Hash support [vector.hash]", with following content:
@@ -99,7 +99,33 @@ template<typename T>
   struct hash<pmr::vector<T>>;
 ```
 
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.
+
+
+Add a new Section "21.4.4.6, Hash support [map.hash]", with following content:
+
+```
+template<typename Key, typename T, typename Compare, typename Allocator> 
+  struct hash<map<Key, T, Compare, Allocator>>;
+  
+template<typename Key, typename T, typename Compare> 
+  struct hash<pmr::map<Key, T, Compare>>;
+```
+
+Enabled if specialization if specializations `hash<remove_const_t<Key>>` and `hash<remove_const_t<T>>` are both enabled, and is disabled otherwise.
+
+
+Add a new Section "21.4.6.4, Hash support [set.hash]", with following content:
+
+```
+template<typename Key, typename Compare, typename Allocator> 
+  struct hash<set<Key, Compare, Allocator>>;
+  
+template<typename Key, typename Compare> 
+  struct hash<pmr::set<Key, Compare>>;
+```
+
+Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and is disabled otherwise.
 
 
 Add a new Section "21.6.4.6, Hash support [queue.hash]", with following content:
@@ -109,7 +135,7 @@ template<typename T, typename Container>
   struct hash<queue<T, Container>>;
 ```
 
-Enabled if specialization `hash<std::remove_const_t<Container>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<Container>>` is enabled, and disabled otherwise.
 
 
 Add a new Section "21.6.6.6, Hash support [stack.hash]", with following content:
@@ -119,7 +145,7 @@ template<typename T, typename Container>
   struct hash<stack<T, Container>>;
 ```
 
-Enabled if specialization `hash<std::remove_const_t<Container>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<Container>>` is enabled, and disabled otherwise.
 
 
 Add a new Section "25.4.11, Hash support [complex.hash]", with following content:
@@ -129,7 +155,7 @@ template<typename T>
   struct hash<complex<T>>;
 ```
 
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise. TODO
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise. TODO
 
 
 Add a new Section "25.7.2.9, Hash support [valarray.hash]", with following content:
@@ -139,7 +165,7 @@ template<typename T>
   struct hash<valarray<T>>;
 ```
 
-Enabled if specialization `hash<std::remove_const_t<T>>` is enabled, and disabled otherwise.
+Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.
 
 Possible implementation {#impl}
 ========================
