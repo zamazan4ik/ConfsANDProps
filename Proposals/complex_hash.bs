@@ -4,7 +4,8 @@ Shortname: P0000
 Status: NP
 Group: WG21
 Level: 1
-Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by
+Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by, zamazan4ik@tut.by
+        Anthony Polukhin, Yandex, antoshkka@gmail.com, antoshkka@gmail.com
 Audience: LEWG, LWG
 !Source: https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/complex_hash.bs
 Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from STL like std::vector, std::array, etc. - but we have possbility to calculate hash from these containers. People who needs hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from STL and for their versions with polymorphic allocator if they exist.
