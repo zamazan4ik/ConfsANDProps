@@ -5,10 +5,10 @@ Status: NP
 Group: WG21
 Level: 1
 Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by, zamazan4ik@tut.by
-        Anthony Polukhin, Yandex, antoshkka@gmail.com, antoshkka@gmail.com
-Audience: LEWG, LWG
+        Anthony Polukhin, Yandex Taxi, antoshkka@gmail.com, antoshkka@yandex-team.ru
+!Audience: LEWGI, LEWG, LWG
 !Source: https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/complex_hash.bs
-Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from STL like std::vector, std::array, etc. - but we have possbility to calculate hash from these containers. People who needs hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from STL and for their versions with polymorphic allocator if they exist.
+Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. - but we have possbility to calculate hash from these containers. People who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library.
 
 Date: 2018-12-04
 Markup Shorthands: markdown yes
@@ -24,7 +24,7 @@ template<typename A, typename B>
   struct hash<pair<A, B>>;
 ```  
  
-<span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are enabled both, and disabled otherwise.</span>
+<span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are both enabled, and disabled otherwise.</span>
 
 
 Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:
@@ -127,46 +127,6 @@ template<typename Key, typename Compare, typename Allocator>
 <span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and disabled otherwise.</span>
 
 
-Add a new Section "21.5.4.6, Hash support [unord.map.hash]", with following content:
-
-```
-template<typename Key, typename T, typename Hash, typename Pred, typename Allocator> 
-  struct hash<unordered_map<Key, T, Hash, Pred, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` and `hash<remove_const_t<T>>` are both enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.5.5.5, Hash support [unord.multimap.hash]", with following content:
-
-```
-template<typename Key, typename T, typename Hash, typename Pred, typename Allocator> 
-  struct hash<unordered_multimap<Key, T, Hash, Pred, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` and `hash<remove_const_t<T>>` are both enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.5.6.4, Hash support [unord.set.hash]", with following content:
-
-```
-template<typename Key, typename Hash, typename Pred, typename Allocator> 
-  struct hash<unordered_set<Key, Hash, Pred, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.5.7.4, Hash support [unord.multiset.hash]", with following content:
-
-```
-template<typename Key, typename Hash, typename Pred, typename Allocator> 
-  struct hash<unordered_multiset<Key, Hash, Pred, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and disabled otherwise.</span>
-
-
 Add a new Section "21.6.4.6, Hash support [queue.hash]", with following content:
 
 ```
@@ -207,9 +167,10 @@ template<typename charT, typename Allocator>
 <span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
 
 
-Add a new Section "21.2.8.9, Hash support [container.hash]", with following content:
+Add a new paragraph to "21.2.1, General container requirements [container.requirements.general]", with following content:
 
-<span style="color:green">Let's define `T1` and `T2` as standard sequence container types or standard adapters(for which `hash` specializations are enabled). Let's define `U` as type which is held by `T1` and `T2`. Let's define `t1` as object of type `T1<U>` and `t2` as object of type `T2<U>`. In this case if `size(t1) == size(t2)` and `equal(begin(t1), end(t1), begin(t2)) == true`, then `hash<T1<U>>()(t1) == hash<T2<U>>()(t2)`.</span>
+<span style="color:green">Let `X` denote a container type, `x` denote a value of type `X`, `TUPLE` denote a `tuple` value of all the values of `x` from `begin()` to `end()` where `get<i>(TUPLE)` equals `*advance(x.begin(), i)` for any i in range `[0; x.size())`.  For enabled specialization `hash<X>` the following holds:
+`hash<X>{}(x)` == `hash<decltype(TUPLE)>{}(TUPLE)`.</span>
 
 Possible implementation {#impl}
 ========================
