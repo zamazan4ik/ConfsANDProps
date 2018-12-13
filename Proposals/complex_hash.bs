@@ -14,6 +14,12 @@ Date: 2018-12-04
 Markup Shorthands: markdown yes
 </pre>
 
+Design decisions {#design}
+========================
+
+  * We not enabled `hash` for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of it can be quite difficult to write proper hash function which satisft C++ Standard requirements. If it can be done easily, in our opinion we should enable `hash` for unordered containers from Standard Library.
+  * Also we didn't enable hash for `stack` and `queue` adapters. But probably it should be changed.
+
 Proposed wording {#wording}
 ========================
 
@@ -24,7 +30,11 @@ template<typename A, typename B>
   struct hash<pair<A, B>>;
 ```  
  
-<span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are both enabled, and disabled otherwise.</span>
+<span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are both enabled, and disabled otherwise.
+
+Let `PAIR` denote a `pair` type, `x` denote a value of type `PAIR`, `TUPLE` denote a `tuple` value of `x.first` and `x.second` where `get<0>(TUPLE)` equals `x.first` and `get<1>(TUPLE)` equals `x.second`. For enabled specialization `hash<X>` the following holds:
+`hash<X>{}(x)` == `hash<decltype(TUPLE)>{}(TUPLE)`.
+</span>
 
 
 Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:
@@ -127,26 +137,6 @@ template<typename Key, typename Compare, typename Allocator>
 <span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and disabled otherwise.</span>
 
 
-Add a new Section "21.6.4.6, Hash support [queue.hash]", with following content:
-
-```
-template<typename T, typename Container> 
-  struct hash<queue<T, Container>>;
-```
-
-<span style="color:green">Enabled if specialization `hash<remove_const_t<Container>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.6.6.6, Hash support [stack.hash]", with following content:
-
-```
-template<typename T, typename Container> 
-  struct hash<stack<T, Container>>;
-```
-
-<span style="color:green">Enabled if specialization `hash<remove_const_t<Container>>` is enabled, and disabled otherwise.</span>
-
-
 Add a new Section "25.7.2.9, Hash support [valarray.hash]", with following content:
 
 ```
@@ -157,6 +147,23 @@ template<typename T>
 <span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
 
 
+Remove a paragraph from Section "20.3.5, Hash support [basic.string.hash]", with following content:
+
+<span style="color:red">
+```
+template<> struct hash<string>;
+template<> struct hash<u8string>;
+template<> struct hash<u16string>;
+template<> struct hash<u32string>;
+template<> struct hash<wstring>;
+template<> struct hash<pmr::string>;
+template<> struct hash<pmr::u8string>;
+template<> struct hash<pmr::u16string>;
+template<> struct hash<pmr::u32string>;
+template<> struct hash<pmr::wstring>;
+```
+</span>
+
 Add a new paragraph to Section "20.3.5, Hash support [basic.string.hash]", with following content:
 
 ```
@@ -164,7 +171,8 @@ template<typename charT, typename Allocator>
   struct hash<basic_string<charT, char_traits<charT>, Allocator>>;
 ```
 
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
+<span style="color:green">Enabled if specialization `hash<remove_const_t<charT>>` is enabled, and disabled otherwise.</span>
+
 
 
 Add a new paragraph to "21.2.1, General container requirements [container.requirements.general]", with following content:
