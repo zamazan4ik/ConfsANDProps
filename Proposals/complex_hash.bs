@@ -17,8 +17,9 @@ Markup Shorthands: markdown yes
 Design decisions {#design}
 ========================
 
-  * We not enabled `hash` for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of it can be quite difficult to write proper hash function which satisft C++ Standard requirements. If it can be done easily, in our opinion we should enable `hash` for unordered containers from Standard Library.
-  * Also we didn't enable hash for `stack` and `queue` adapters. But probably it should be changed.
+  * Proposed hash specializations give the same hash value for different containers with the same content. This may be useful for users to compare different containers in a fast maner. This also allows users to have heterogeneous searches in unordered maps by keays of different type.
+  * We do not enable `hash` for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of the hashing collisions and buckets count. Position of the elment depends on those two factors, which leads to different hashes for containers with the same content.
+  * We do not enable hash for `stack` and `queue` adapters for now.
 
 Proposed wording {#wording}
 ========================
@@ -32,8 +33,8 @@ template<typename A, typename B>
  
 <span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are both enabled, and disabled otherwise.
 
-Let `PAIR` denote a `pair` type, `x` denote a value of type `PAIR`, `TUPLE` denote a `tuple` value of `x.first` and `x.second` where `get<0>(TUPLE)` equals `x.first` and `get<1>(TUPLE)` equals `x.second`. For enabled specialization `hash<X>` the following holds:
-`hash<X>{}(x)` == `hash<decltype(TUPLE)>{}(TUPLE)`.
+Let `PAIR` denote a `pair` type, `x` denote a value of type `PAIR`. For enabled specialization `hash<PAIR>` the following holds:
+`hash<PAIR>{}(x)` == `hash<decltype(tuple{x})>{}(x)`.
 </span>
 
 

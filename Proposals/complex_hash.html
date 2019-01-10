@@ -1229,7 +1229,7 @@ Possible extra rowspan handling
   </style>
   <meta content="Bikeshed version f9fa604b61e5fc96edf5cdebd2c04e0e69b33a7b" name="generator">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="9d52e449318d26fcd74cf9ac6c7b990b986d4097" name="document-revision">
+  <meta content="880c15ea5ebb331802993a34a49aeac5287ca8fb" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1475,9 +1475,11 @@ pre .property::before, pre .property::after {
    <h2 class="heading settled" data-level="1" id="design"><span class="secno">1. </span><span class="content">Design decisions</span><a class="self-link" href="#design"></a></h2>
    <ul>
     <li data-md>
-     <p>We not enabled <code class="highlight"><c- n>hash</c-></code> for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of it can be quite difficult to write proper hash function which satisft C++ Standard requirements. If it can be done easily, in our opinion we should enable <code class="highlight"><c- n>hash</c-></code> for unordered containers from Standard Library.</p>
+     <p>Proposed hash specializations give the same hash value for different containers with the same content. This may be useful for users to compare different containers in a fast maner. This also allows users to have heterogeneous searches in unordered maps by keays of different type.</p>
     <li data-md>
-     <p>Also we didn’t enable hash for <code class="highlight"><c- n>stack</c-></code> and <code class="highlight"><c- n>queue</c-></code> adapters. But probably it should be changed.</p>
+     <p>We do not enable <code class="highlight"><c- n>hash</c-></code> for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of the hashing collisions and buckets count. Position of the elment depends on those two factors, which leads to different hashes for containers with the same content.</p>
+    <li data-md>
+     <p>We do not enable hash for <code class="highlight"><c- n>stack</c-></code> and <code class="highlight"><c- n>queue</c-></code> adapters for now.</p>
    </ul>
    <h2 class="heading settled" data-level="2" id="wording"><span class="secno">2. </span><span class="content">Proposed wording</span><a class="self-link" href="#wording"></a></h2>
    <p>Add a new Section "19.4.6, Hash support [pair.hash]", with following content:</p>
@@ -1485,7 +1487,7 @@ pre .property::before, pre .property::after {
   <c- k>struct</c-> <c- n>hash</c-><c- o>&lt;</c-><c- n>pair</c-><c- o>&lt;</c-><c- n>A</c-><c- p>,</c-> <c- n>B</c-><c- o>>></c-><c- p>;</c->
 </pre>
    <p><span style="color:green">Enabled if specializations <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>remove_const_t</c-><c- o>&lt;</c-><c- n>A</c-><c- o>>></c-></code> and <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>remove_const_t</c-><c- o>&lt;</c-><c- n>B</c-><c- o>>></c-></code> are both enabled, and disabled otherwise.</span></p>
-   <p>Let <code class="highlight"><c- n>PAIR</c-></code> denote a <code class="highlight"><c- n>pair</c-></code> type, <code class="highlight"><c- n>x</c-></code> denote a value of type <code class="highlight"><c- n>PAIR</c-></code>, <code class="highlight"><c- n>TUPLE</c-></code> denote a <code class="highlight"><c- n>tuple</c-></code> value of <code class="highlight"><c- n>x</c-><c- p>.</c-><c- n>first</c-></code> and <code class="highlight"><c- n>x</c-><c- p>.</c-><c- n>second</c-></code> where <code class="highlight"><c- n>get</c-><c- o>&lt;</c-><c- mi>0</c-><c- o>></c-><c- p>(</c-><c- n>TUPLE</c-><c- p>)</c-></code> equals <code class="highlight"><c- n>x</c-><c- p>.</c-><c- n>first</c-></code> and <code class="highlight"><c- n>get</c-><c- o>&lt;</c-><c- mi>1</c-><c- o>></c-><c- p>(</c-><c- n>TUPLE</c-><c- p>)</c-></code> equals <code class="highlight"><c- n>x</c-><c- p>.</c-><c- n>second</c-></code>. For enabled specialization <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>X</c-><c- o>></c-></code> the following holds: <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>X</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code> == <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>TUPLE</c-><c- p>)</c-><c- o>></c-><c- p>{}(</c-><c- n>TUPLE</c-><c- p>)</c-></code>. </p>
+   <p>Let <code class="highlight"><c- n>PAIR</c-></code> denote a <code class="highlight"><c- n>pair</c-></code> type, <code class="highlight"><c- n>x</c-></code> denote a value of type <code class="highlight"><c- n>PAIR</c-></code>. For enabled specialization <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>PAIR</c-><c- o>></c-></code> the following holds: <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>PAIR</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code> == <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>tuple</c-><c- p>{</c-><c- n>x</c-><c- p>})</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code>. </p>
    <p>Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:</p>
 <pre class="highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>typename</c-><c- p>...</c-> <c- n>T</c-><c- o>></c-> 
   <c- k>struct</c-> <c- n>hash</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- n>T</c-><c- p>...</c-><c- o>>></c-><c- p>;</c->
