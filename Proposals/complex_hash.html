@@ -1229,7 +1229,7 @@ Possible extra rowspan handling
   </style>
   <meta content="Bikeshed version f9fa604b61e5fc96edf5cdebd2c04e0e69b33a7b" name="generator">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="2791819d96ab381a7a4982a2cd7a5dcbd409f1b5" name="document-revision">
+  <meta content="9d52e449318d26fcd74cf9ac6c7b990b986d4097" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1460,7 +1460,7 @@ pre .property::before, pre .property::after {
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
-   <p>In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. - but we have possbility to calculate hash from these containers. People who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library.</p>
+   <p>In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. - but we have possbility to calculate hash from these containers. People who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.</p>
   </div>
   <nav data-fill-with="table-of-contents" id="toc">
    <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
