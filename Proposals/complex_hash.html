@@ -2,7 +2,7 @@
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-  <title>P0000R1: Add more std::hash specializations</title>
+  <title>P1406R1: Add more std::hash specializations</title>
 <style data-fill-with="stylesheet">/******************************************************************************
  *                   Style sheet for the W3C specifications                   *
  *
@@ -1229,7 +1229,7 @@ Possible extra rowspan handling
   </style>
   <meta content="Bikeshed version f9fa604b61e5fc96edf5cdebd2c04e0e69b33a7b" name="generator">
   <link href="https://isocpp.org/favicon.ico" rel="icon">
-  <meta content="880c15ea5ebb331802993a34a49aeac5287ca8fb" name="document-revision">
+  <meta content="cac739baa8b563e70659377eeb3e0c6b9694d177" name="document-revision">
 <style>/* style-md-lists */
 
 /* This is a weird hack for me not yet following the commonmark spec
@@ -1438,7 +1438,7 @@ pre .property::before, pre .property::after {
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
-   <h1 class="p-name no-ref" id="title">P0000R1<br>Add more std::hash specializations</h1>
+   <h1 class="p-name no-ref" id="title">P1406R1<br>Add more std::hash specializations</h1>
    <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">New Proposal, <time class="dt-updated" datetime="2018-12-04">2018-12-04</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
@@ -1446,7 +1446,7 @@ pre .property::before, pre .property::after {
      <dd>
       <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="zamazan4ik@tut.by">Alexander Zaitsev</a> (<span class="p-org org">Solarwinds</span>) <a class="u-email email" href="mailto:zamazan4ik@tut.by">zamazan4ik@tut.by</a>
      <dd>
-      <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="antoshkka@yandex-team.ru">Anthony Polukhin</a> (<span class="p-org org">Yandex Taxi</span>) <a class="u-email email" href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>
+      <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="antoshkka@yandex-team.ru">Antony Polukhin</a> (<span class="p-org org">Yandex Taxi</span>) <a class="u-email email" href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>
      <dt>Project:
      <dd>ISO/IEC JTC1/SC22/WG21 14882: Programming Language — C++
      <dt>Audience:
@@ -1460,7 +1460,7 @@ pre .property::before, pre .property::after {
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
-   <p>In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. - but we have possbility to calculate hash from these containers. People who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.</p>
+   <p>In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.</p>
   </div>
   <nav data-fill-with="table-of-contents" id="toc">
    <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
@@ -1475,7 +1475,7 @@ pre .property::before, pre .property::after {
    <h2 class="heading settled" data-level="1" id="design"><span class="secno">1. </span><span class="content">Design decisions</span><a class="self-link" href="#design"></a></h2>
    <ul>
     <li data-md>
-     <p>Proposed hash specializations give the same hash value for different containers with the same content. This may be useful for users to compare different containers in a fast maner. This also allows users to have heterogeneous searches in unordered maps by keays of different type.</p>
+     <p>Proposed hash specializations give the same hash value for different containers with the same content. This may be useful for users to compare different containers in a fast maner. This also allows users to have heterogeneous searches in unordered maps by keys of different type.</p>
     <li data-md>
      <p>We do not enable <code class="highlight"><c- n>hash</c-></code> for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of the hashing collisions and buckets count. Position of the elment depends on those two factors, which leads to different hashes for containers with the same content.</p>
     <li data-md>
@@ -1487,7 +1487,7 @@ pre .property::before, pre .property::after {
   <c- k>struct</c-> <c- n>hash</c-><c- o>&lt;</c-><c- n>pair</c-><c- o>&lt;</c-><c- n>A</c-><c- p>,</c-> <c- n>B</c-><c- o>>></c-><c- p>;</c->
 </pre>
    <p><span style="color:green">Enabled if specializations <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>remove_const_t</c-><c- o>&lt;</c-><c- n>A</c-><c- o>>></c-></code> and <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>remove_const_t</c-><c- o>&lt;</c-><c- n>B</c-><c- o>>></c-></code> are both enabled, and disabled otherwise.</span></p>
-   <p>Let <code class="highlight"><c- n>PAIR</c-></code> denote a <code class="highlight"><c- n>pair</c-></code> type, <code class="highlight"><c- n>x</c-></code> denote a value of type <code class="highlight"><c- n>PAIR</c-></code>. For enabled specialization <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>PAIR</c-><c- o>></c-></code> the following holds: <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>PAIR</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code> == <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>tuple</c-><c- p>{</c-><c- n>x</c-><c- p>})</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code>. </p>
+   <p><span style="color:green">Let <code class="highlight"><c- n>PAIR</c-></code> denote a <code class="highlight"><c- n>pair</c-></code> type, <code class="highlight"><c- n>x</c-></code> denote a value of type <code class="highlight"><c- n>PAIR</c-></code>. For enabled specialization <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>PAIR</c-><c- o>></c-></code> the following holds: <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- n>PAIR</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code> == <code class="highlight"><c- n>hash</c-><c- o>&lt;</c-><c- k>decltype</c-><c- p>(</c-><c- n>tuple</c-><c- p>{</c-><c- n>x</c-><c- p>})</c-><c- o>></c-><c- p>{}(</c-><c- n>x</c-><c- p>)</c-></code>. </span></p>
    <p>Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:</p>
 <pre class="highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>typename</c-><c- p>...</c-> <c- n>T</c-><c- o>></c-> 
   <c- k>struct</c-> <c- n>hash</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- n>T</c-><c- p>...</c-><c- o>>></c-><c- p>;</c->
