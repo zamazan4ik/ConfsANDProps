@@ -1,0 +1,142 @@
+<pre class='metadata'>
+Title: Add apply_permutation function
+Shortname: P0000
+Status: NP
+Group: WG21
+Level: 1
+Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by, zamazan4ik@tut.by
+        Anthony Polukhin, Yandex Taxi, antoshkka@gmail.com, antoshkka@yandex-team.ru
+!Audience: LEWGI, LEWG, LWG
+!Source: https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/apply_permutation.bs
+Abstract: In Standard library we already have functions for working with permutations. In this proposal we suggest to add two functions to Standard Library: apply_permutation and apply_reverse_permutation.
+
+Date: 2018-12-04
+Markup Shorthands: markdown yes
+</pre>
+
+Proposed wording {#wording}
+========================
+
+Add a new Section "24.7.13, Permutation utilities [alg.permutation.utilities]", with following content:
+
+```
+template<typename RandomAccessIterator1, typename RandomAccessIterator2>
+constexpr void apply_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,
+                                      RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end);
+```
+<span style="color:green">
+ 1. 
+</span>
+
+
+```
+template<typename RandomAccessIterator1, typename RandomAccessIterator2>
+constexpr void apply_reverse_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,
+                                                    RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end);
+```
+
+<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
+
+Iterator requirements {#iterator}
+========================
+
+`apply_permutation` and `apply_reverse_permutation` work only on RandomAccess and Contiguos iterators. RandomAccess or Contiguos iterators required both for item and index sequences.
+
+Exception safety {#exception}
+========================
+
+`apply_permutation` and `apply_reverse_permutation` take their parameters by iterators or reference, and do not depend upon any global state. Therefore, `apply_permutation` and `apply_reverse_permutation` provide the strong exception guarantee.
+
+Open questions {#questions}
+========================
+
+  * Question about naming is open. E.g. `apply_reverse_permutation` is a little bit ugly. Other ideas?
+
+Usage example {#example}
+========================
+
+```
+#include <algorithm>
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+    {
+        std::cout << "apply_permutation with iterators:\n";
+        std::vector<int> vec{1, 2, 3, 4, 5}, order{4, 2, 3, 1, 0};
+    
+        std::apply_permutation(vec.begin(), vec.end(), order.begin(), order.end());
+        for (const auto& x : vec)
+        {
+            std::cout << x << ", ";
+        }
+        std::cout << std::endl;
+    }
+    {
+        std::cout << "apply_reverse_permutation with iterators:\n";
+        std::vector<int> vec{1, 2, 3, 4, 5}, order{4, 2, 3, 1, 0};
+    
+        std::apply_reverse_permutation(vec.begin(), vec.end(), order.begin(), order.end());
+        for (const auto& x : vec)
+        {
+            std::cout << x << ", ";
+        }
+        std::cout << std::endl;
+    }
+    return 0;
+}  
+```
+
+Possible implementation {#impl}
+========================
+
+```
+template<typename RandomAccessIterator1, typename RandomAccessIterator2>
+constexpr void apply_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,
+                                      RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end)
+{
+    using Diff = typename std::iterator_traits<RandomAccessIterator1>::difference_type;
+    using std::swap;
+    Diff size = std::distance(item_begin, item_end);
+    for (Diff i = 0; i < size; i++)
+    {
+        auto current = i;
+        while (i != ind_begin[current])
+        {
+            auto next = ind_begin[current];
+            swap(item_begin[current], item_begin[next]);
+            ind_begin[current] = current;
+            current = next;
+        }
+        ind_begin[current] = current;
+    }
+}
+
+template<typename RandomAccessIterator1, typename RandomAccessIterator2>
+constexpr void apply_reverse_permutation(RandomAccessIterator1 item_begin, RandomAccessIterator1 item_end,
+                                                    RandomAccessIterator2 ind_begin, RandomAccessIterator2 ind_end)
+{
+    using Diff = typename std::iterator_traits<RandomAccessIterator2>::difference_type;
+    using std::swap;
+    Diff length = std::distance(item_begin, item_end);
+    for (Diff i = 0; i < length; i++)
+    {
+        while (i != ind_begin[i])
+        {
+            Diff next = ind_begin[i];
+            swap(item_begin[i], item_begin[next]);
+            swap(ind_begin[i], ind_begin[next]);
+        }
+    }
+}
+```
+
+Possible implementation can be found in [Boost.Algorithm](https://github.com/boostorg/algorithm/blob/master/include/boost/algorithm/apply_permutation.hpp "Boost.Algorithm") library. Original version can be found in Microsoft Developer blog (see links below).
+
+References {#references}
+========================
+
+[Boost.Algorithm documentation](https://www.boost.org/doc/libs/1_69_0/libs/algorithm/doc/html/the_boost_algorithm_library/Misc/apply_permutation.html "apply_permutation documentation from Boost.Algorithm")
+
+Microsoft Developer "Old new thing" blog: [1](https://blogs.msdn.microsoft.com/oldnewthing/20170102-00/?p=95095), [2](https://blogs.msdn.microsoft.com/oldnewthing/20170103-00/?p=95105), [3](https://blogs.msdn.microsoft.com/oldnewthing/20170104-00/?p=95115), [4](https://blogs.msdn.microsoft.com/oldnewthing/20170109-00/?p=95145), [5](https://blogs.msdn.microsoft.com/oldnewthing/20170110-00/?p=95155), [6](https://blogs.msdn.microsoft.com/oldnewthing/20170111-00/?p=95165)
