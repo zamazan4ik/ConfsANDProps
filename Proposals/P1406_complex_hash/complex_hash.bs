@@ -14,7 +14,7 @@ Date: 2018-12-04
 Markup Shorthands: markdown yes
 </pre>
 
-Changes since R1
+Changes since R1 {#changes_r1}
 ========================
 
   * Removed a requirement for the same hash value for different containers with the same content.
