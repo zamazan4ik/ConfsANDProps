@@ -3,23 +3,28 @@ Title: Add more std::hash specializations
 Shortname: P1406
 Status: NP
 Group: WG21
-Level: 1
+Level: 2
 Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by, zamazan4ik@tut.by
         Antony Polukhin, Yandex Taxi, antoshkka@gmail.com, antoshkka@yandex-team.ru
 !Audience: LEWGI, LEWG, LWG
 !Source: https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/complex_hash.bs
-Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.
+Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::array, std::tuple, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.
 
 Date: 2018-12-04
 Markup Shorthands: markdown yes
 </pre>
 
+Changes since R1
+========================
+
+  * Removed a requirement for the same hash value for different containers with the same content.
+  * Left std::hash specializations only for std::tuple, std::pair, std::array, std::basic_string. Other specializations are moved to another paper because of lack of motivation.
+
 Design decisions {#design}
 ========================
 
-  * Proposed hash specializations give the same hash value for different containers with the same content. This may be useful for users to compare different containers in a fast maner. This also allows users to have heterogeneous searches in unordered maps by keys of different type.
   * We do not enable `hash` for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of the hashing collisions and buckets count. Position of the elment depends on those two factors, which leads to different hashes for containers with the same content.
-  * We do not enable hash for `stack` and `queue` adapters for now.
+  * We do not enable hash for `stack` and `queue` adapters for now. Probably will be enabled in future papers.
 
 Proposed wording {#wording}
 ========================
@@ -57,97 +62,6 @@ template<typename T, std::size_t N>
  
 <span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
 
-
-Add a new Section "21.3.8.6, Hash support [deque.hash]", with following content:
-
-```
-template<typename T, typename Allocator> 
-  struct hash<deque<T, Allocator>>;
-```  
-  
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.3.9.8, Hash support [forward_list.hash]", with following content:
-
-```
-template<typename T, typename Allocator> 
-  struct hash<forward_list<T, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.3.10.7, Hash support [list.hash]", with following content:
-
-```
-template<typename T, typename Allocator> 
-  struct hash<list<T, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.3.11.7, Hash support [vector.hash]", with following content:
-
-```
-template<typename T, typename Allocator> 
-  struct hash<vector<T, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.4.4.6, Hash support [map.hash]", with following content:
-
-```
-template<typename Key, typename T, typename Compare, typename Allocator> 
-  struct hash<map<Key, T, Compare, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` and `hash<remove_const_t<T>>` are both enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.4.5.5, Hash support [multimap.hash]", with following content:
-
-```
-template<typename Key, typename T, typename Compare, typename Allocator> 
-  struct hash<multimap<Key, T, Compare, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` and `hash<remove_const_t<T>>` are both enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.4.6.4, Hash support [set.hash]", with following content:
-
-```
-template<typename Key, typename Compare, typename Allocator> 
-  struct hash<set<Key, Compare, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "21.4.7.4, Hash support [multiset.hash]", with following content:
-
-```
-template<typename Key, typename Compare, typename Allocator> 
-  struct hash<multiset<Key, Compare, Allocator>>;
-```
-
-<span style="color:green">Enabled if specialization if specializations `hash<remove_const_t<Key>>` is enabled, and disabled otherwise.</span>
-
-
-Add a new Section "25.7.2.9, Hash support [valarray.hash]", with following content:
-
-```
-template<typename T> 
-  struct hash<valarray<T>>;
-```
-
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
-
-
 Remove a paragraph from Section "20.3.5, Hash support [basic.string.hash]", with following content:
 
 <span style="color:red">
@@ -174,12 +88,6 @@ template<typename charT, typename Allocator>
 
 <span style="color:green">Enabled if specialization `hash<remove_const_t<charT>>` is enabled, and disabled otherwise.</span>
 
-
-
-Add a new paragraph to "21.2.1, General container requirements [container.requirements.general]", with following content:
-
-<span style="color:green">Let `X` denote a container type, `x` denote a value of type `X`, `TUPLE` denote a `tuple` value of all the values of `x` from `begin()` to `end()` where `get<i>(TUPLE)` equals `*advance(x.begin(), i)` for any i in range `[0; x.size())`.  For enabled specialization `hash<X>` the following holds:
-`hash<X>{}(x)` == `hash<decltype(TUPLE)>{}(TUPLE)`.</span>
 
 Possible implementation {#impl}
 ========================
