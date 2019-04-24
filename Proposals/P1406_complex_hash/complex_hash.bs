@@ -3,28 +3,27 @@ Title: Add more std::hash specializations
 Shortname: P1406
 Status: NP
 Group: WG21
-Level: 2
+Level: 1
 Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by, zamazan4ik@tut.by
         Antony Polukhin, Yandex Taxi, antoshkka@gmail.com, antoshkka@yandex-team.ru
 !Audience: LEWGI, LEWG, LWG
 !Source: https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/P1406_complex_hash/complex_hash.bs
 Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::array, std::tuple, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.
 
-Date: 2018-12-04
+Date: 2019-04-24
 Markup Shorthands: markdown yes
 </pre>
 
-Changes since R1 {#changes_r1}
+Changes since R0 {#changes_r0}
 ========================
 
-  * Removed a requirement for the same hash value for different containers with the same content.
-  * Left std::hash specializations only for std::tuple, std::pair, std::array, std::basic_string. Other specializations are moved to another paper because of lack of motivation.
+  * Removed a requirement that different containers with the same content should return the same hash value.
+  * Left std::hash specializations only for `std::tuple`, `std::pair`, `std::array`, `std::basic_string`. Other specializations are moved to another paper because of lack of motivation.
 
 Design decisions {#design}
 ========================
 
-  * We do not enable `hash` for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of the hashing collisions and buckets count. Position of the elment depends on those two factors, which leads to different hashes for containers with the same content.
-  * We do not enable hash for `stack` and `queue` adapters for now. Probably will be enabled in future papers.
+  * We do not require same hash values for different containers that are not comparable (for example `std::pair<int, int>`, `std::tuple<int, int>`, `std::array<int, 2>`).
 
 Proposed wording {#wording}
 ========================
@@ -37,10 +36,6 @@ template<typename A, typename B>
 ```  
  
 <span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are both enabled, and disabled otherwise.</span>
-
-<span style="color:green">Let `PAIR` denote a `pair` type, `x` denote a value of type `PAIR`. For enabled specialization `hash<PAIR>` the following holds:
-`hash<PAIR>{}(x)` == `hash<decltype(tuple{x})>{}(x)`.
-</span>
 
 
 Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:
