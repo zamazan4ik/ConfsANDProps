@@ -8,7 +8,7 @@ Editor: Alexander Zaitsev, Solarwinds, zamazan4ik@tut.by, zamazan4ik@tut.by
         Antony Polukhin, Yandex Taxi, antoshkka@gmail.com, antoshkka@yandex-team.ru
 !Audience: LEWGI, LEWG, LWG
 !Source: https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/complex_hash.bs
-Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::array, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.
+Abstract: In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::vector, std::list, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.
 
 Date: 2018-12-04
 Markup Shorthands: markdown yes
@@ -17,46 +17,11 @@ Markup Shorthands: markdown yes
 Design decisions {#design}
 ========================
 
-  * Proposed hash specializations give the same hash value for different containers with the same content. This may be useful for users to compare different containers in a fast maner. This also allows users to have heterogeneous searches in unordered maps by keys of different type.
   * We do not enable `hash` for unordered_set, unordered_map, unordered_multiset, unordered_multimap because of the hashing collisions and buckets count. Position of the elment depends on those two factors, which leads to different hashes for containers with the same content.
   * We do not enable hash for `stack` and `queue` adapters for now.
 
 Proposed wording {#wording}
 ========================
-
-Add a new Section "19.4.6, Hash support [pair.hash]", with following content:
-
-```
-template<typename A, typename B> 
-  struct hash<pair<A, B>>;
-```  
- 
-<span style="color:green">Enabled if specializations `hash<remove_const_t<A>>` and `hash<remove_const_t<B>>` are both enabled, and disabled otherwise.</span>
-
-<span style="color:green">Let `PAIR` denote a `pair` type, `x` denote a value of type `PAIR`. For enabled specialization `hash<PAIR>` the following holds:
-`hash<PAIR>{}(x)` == `hash<decltype(tuple{x})>{}(x)`.
-</span>
-
-
-Add a new Section "19.5.3.11, Hash support [tuple.hash]", with following content:
-
-```
-template<typename... T> 
-  struct hash<tuple<T...>>;
-```  
- 
-<span style="color:green">Enabled if specialization `hash<remove_const_t<U>>` is enabled for every template argument `U` in the parameter pack, and disabled otherwise.</span>
-
-
-Add a new Section "21.3.7.7, Hash support [array.hash]", with following content:
-
-```
-template<typename T, std::size_t N> 
-  struct hash<array<T, N>>;
-```  
- 
-<span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
-
 
 Add a new Section "21.3.8.6, Hash support [deque.hash]", with following content:
 
@@ -147,39 +112,19 @@ template<typename T>
 
 <span style="color:green">Enabled if specialization `hash<remove_const_t<T>>` is enabled, and disabled otherwise.</span>
 
+Motivation {#motivation}
+========================
 
-Remove a paragraph from Section "20.3.5, Hash support [basic.string.hash]", with following content:
+All of these `std::hash` specializations (except specializations for `std::forward_list` and `std::valarray` what should be fixed) were introduced in Boost.Hash during the years. There is no reason don't enable these specializations in C++ Standard.
 
-<span style="color:red">
-```
-template<> struct hash<string>;
-template<> struct hash<u8string>;
-template<> struct hash<u16string>;
-template<> struct hash<u32string>;
-template<> struct hash<wstring>;
-template<> struct hash<pmr::string>;
-template<> struct hash<pmr::u8string>;
-template<> struct hash<pmr::u16string>;
-template<> struct hash<pmr::u32string>;
-template<> struct hash<pmr::wstring>;
-```
-</span>
+The main reason to enable additional `std::hash` specializations is allowing to end-user use complex keys in unordered containers.
 
-Add a new paragraph to Section "20.3.5, Hash support [basic.string.hash]", with following content:
+Another reason is simplifying to end-user writing own `std::hash` specializations for complex types which can consist of different STL containers.
 
-```
-template<typename charT, typename Allocator> 
-  struct hash<basic_string<charT, char_traits<charT>, Allocator>>;
-```
+From my observations we haven't any limitations which can influence on an implementation in Standard Library.
 
-<span style="color:green">Enabled if specialization `hash<remove_const_t<charT>>` is enabled, and disabled otherwise.</span>
-
-
-
-Add a new paragraph to "21.2.1, General container requirements [container.requirements.general]", with following content:
-
-<span style="color:green">Let `X` denote a container type, `x` denote a value of type `X`, `TUPLE` denote a `tuple` value of all the values of `x` from `begin()` to `end()` where `get<i>(TUPLE)` equals `*advance(x.begin(), i)` for any i in range `[0; x.size())`.  For enabled specialization `hash<X>` the following holds:
-`hash<X>{}(x)` == `hash<decltype(TUPLE)>{}(TUPLE)`.</span>
+Examples {#examples}
+========================
 
 Possible implementation {#impl}
 ========================
