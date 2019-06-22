@@ -1,0 +1,2582 @@
+<!doctype html><html lang="en">
+ <head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+  <title>TODOR0: Unbounded-Precision Integer Types</title>
+<style data-fill-with="stylesheet">/******************************************************************************
+ *                   Style sheet for the W3C specifications                   *
+ *
+ * Special classes handled by this style sheet include:
+ *
+ * Indices
+ *   - .toc for the Table of Contents (<ol class="toc">)
+ *     + <span class="secno"> for the section numbers
+ *   - #toc for the Table of Contents (<nav id="toc">)
+ *   - ul.index for Indices (<a href="#ref">term</a><span>, in §N.M</span>)
+ *   - table.index for Index Tables (e.g. for properties or elements)
+ *
+ * Structural Markup
+ *   - table.data for general data tables
+ *     -> use 'scope' attribute, <colgroup>, <thead>, and <tbody> for best results !
+ *     -> use <table class='complex data'> for extra-complex tables
+ *     -> use <td class='long'> for paragraph-length cell content
+ *     -> use <td class='pre'> when manual line breaks/indentation would help readability
+ *   - dl.switch for switch statements
+ *   - ol.algorithm for algorithms (helps to visualize nesting)
+ *   - .figure and .caption (HTML4) and figure and figcaption (HTML5)
+ *     -> .sidefigure for right-floated figures
+ *   - ins/del
+ *
+ * Code
+ *   - pre and code
+ *
+ * Special Sections
+ *   - .note       for informative notes             (div, p, span, aside, details)
+ *   - .example    for informative examples          (div, p, pre, span)
+ *   - .issue      for issues                        (div, p, span)
+ *   - .assertion  for assertions                    (div, p, span)
+ *   - .advisement for loud normative statements     (div, p, strong)
+ *   - .annoying-warning for spec obsoletion notices (div, aside, details)
+ *
+ * Definition Boxes
+ *   - pre.def   for WebIDL definitions
+ *   - table.def for tables that define other entities (e.g. CSS properties)
+ *   - dl.def    for definition lists that define other entitles (e.g. HTML elements)
+ *
+ * Numbering
+ *   - .secno for section numbers in .toc and headings (<span class='secno'>3.2</span>)
+ *   - .marker for source-inserted example/figure/issue numbers (<span class='marker'>Issue 4</span>)
+ *   - ::before styled for CSS-generated issue/example/figure numbers:
+ *     -> Documents wishing to use this only need to add
+ *        figcaption::before,
+ *        .caption::before { content: "Figure "  counter(figure) " ";  }
+ *        .example::before { content: "Example " counter(example) " "; }
+ *        .issue::before   { content: "Issue "   counter(issue) " ";   }
+ *
+ * Header Stuff (ignore, just don't conflict with these classes)
+ *   - .head for the header
+ *   - .copyright for the copyright
+ *
+ * Miscellaneous
+ *   - .overlarge for things that should be as wide as possible, even if
+ *     that overflows the body text area. This can be used on an item or
+ *     on its container, depending on the effect desired.
+ *     Note that this styling basically doesn't help at all when printing,
+ *     since A4 paper isn't much wider than the max-width here.
+ *     It's better to design things to fit into a narrower measure if possible.
+ *   - js-added ToC jump links (see fixup.js)
+ *
+ ******************************************************************************/
+
+/******************************************************************************/
+/*                                   Body                                     */
+/******************************************************************************/
+
+	body {
+		counter-reset: example figure issue;
+
+		/* Layout */
+		max-width: 50em;               /* limit line length to 50em for readability   */
+		margin: 0 auto;                /* center text within page                     */
+		padding: 1.6em 1.5em 2em 50px; /* assume 16px font size for downlevel clients */
+		padding: 1.6em 1.5em 2em calc(26px + 1.5em); /* leave space for status flag     */
+
+		/* Typography */
+		line-height: 1.5;
+		font-family: sans-serif;
+		widows: 2;
+		orphans: 2;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		hyphens: auto;
+
+		/* Colors */
+		color: black;
+		background: white top left fixed no-repeat;
+		background-size: 25px auto;
+	}
+
+
+/******************************************************************************/
+/*                         Front Matter & Navigation                          */
+/******************************************************************************/
+
+/** Header ********************************************************************/
+
+	div.head { margin-bottom: 1em }
+	div.head hr { border-style: solid; }
+
+	div.head h1 {
+		font-weight: bold;
+		margin: 0 0 .1em;
+		font-size: 220%;
+	}
+
+	div.head h2 { margin-bottom: 1.5em;}
+
+/** W3C Logo ******************************************************************/
+
+	.head .logo {
+		float: right;
+		margin: 0.4rem 0 0.2rem .4rem;
+	}
+
+	.head img[src*="logos/W3C"] {
+		display: block;
+		border: solid #1a5e9a;
+		border-width: .65rem .7rem .6rem;
+		border-radius: .4rem;
+		background: #1a5e9a;
+		color: white;
+		font-weight: bold;
+	}
+
+	.head a:hover > img[src*="logos/W3C"],
+	.head a:focus > img[src*="logos/W3C"] {
+		opacity: .8;
+	}
+
+	.head a:active > img[src*="logos/W3C"] {
+		background: #c00;
+		border-color: #c00;
+	}
+
+	/* see also additional rules in Link Styling section */
+
+/** Copyright *****************************************************************/
+
+	p.copyright,
+	p.copyright small { font-size: small }
+
+/** Back to Top / ToC Toggle **************************************************/
+
+	@media print {
+		#toc-nav {
+			display: none;
+		}
+	}
+	@media not print {
+		#toc-nav {
+			position: fixed;
+			z-index: 2;
+			bottom: 0; left: 0;
+			margin: 0;
+			min-width: 1.33em;
+			border-top-right-radius: 2rem;
+			box-shadow: 0 0 2px;
+			font-size: 1.5em;
+			color: black;
+		}
+		#toc-nav > a {
+			display: block;
+			white-space: nowrap;
+
+			height: 1.33em;
+			padding: .1em 0.3em;
+			margin: 0;
+
+			background: white;
+			box-shadow: 0 0 2px;
+			border: none;
+			border-top-right-radius: 1.33em;
+			background: white;
+		}
+		#toc-nav > #toc-jump {
+			padding-bottom: 2em;
+			margin-bottom: -1.9em;
+		}
+
+		#toc-nav > a:hover,
+		#toc-nav > a:focus {
+			background: #f8f8f8;
+		}
+		#toc-nav > a:not(:hover):not(:focus) {
+			color: #707070;
+		}
+
+		/* statusbar gets in the way on keyboard focus; remove once browsers fix */
+		#toc-nav > a[href="#toc"]:not(:hover):focus:last-child {
+			padding-bottom: 1.5rem;
+		}
+
+		#toc-nav:not(:hover) > a:not(:focus) > span + span {
+			/* Ideally this uses :focus-within on #toc-nav */
+			display: none;
+		}
+		#toc-nav > a > span + span {
+			padding-right: 0.2em;
+		}
+
+		#toc-toggle-inline {
+			vertical-align: 0.05em;
+			font-size: 80%;
+			color: gray;
+			color: hsla(203,20%,40%,.7);
+			border-style: none;
+			background: transparent;
+			position: relative;
+		}
+		#toc-toggle-inline:hover:not(:active),
+		#toc-toggle-inline:focus:not(:active) {
+			text-shadow: 1px 1px silver;
+			top: -1px;
+			left: -1px;
+		}
+
+		#toc-nav :active {
+			color: #C00;
+		}
+	}
+
+/** ToC Sidebar ***************************************************************/
+
+	/* Floating sidebar */
+	@media screen {
+		body.toc-sidebar #toc {
+			position: fixed;
+			top: 0; bottom: 0;
+			left: 0;
+			width: 23.5em;
+			max-width: 80%;
+			max-width: calc(100% - 2em - 26px);
+			overflow: auto;
+			padding: 0 1em;
+			padding-left: 42px;
+			padding-left: calc(1em + 26px);
+			background: inherit;
+			background-color: #f7f8f9;
+			z-index: 1;
+			box-shadow: -.1em 0 .25em rgba(0,0,0,.1) inset;
+		}
+		body.toc-sidebar #toc h2 {
+			margin-top: .8rem;
+			font-variant: small-caps;
+			font-variant: all-small-caps;
+			text-transform: lowercase;
+			font-weight: bold;
+			color: gray;
+			color: hsla(203,20%,40%,.7);
+		}
+		body.toc-sidebar #toc-jump:not(:focus) {
+			width: 0;
+			height: 0;
+			padding: 0;
+			position: absolute;
+			overflow: hidden;
+		}
+	}
+	/* Hide main scroller when only the ToC is visible anyway */
+	@media screen and (max-width: 28em) {
+		body.toc-sidebar {
+			overflow: hidden;
+		}
+	}
+
+	/* Sidebar with its own space */
+	@media screen and (min-width: 78em) {
+		body:not(.toc-inline) #toc {
+			position: fixed;
+			top: 0; bottom: 0;
+			left: 0;
+			width: 23.5em;
+			overflow: auto;
+			padding: 0 1em;
+			padding-left: 42px;
+			padding-left: calc(1em + 26px);
+			background: inherit;
+			background-color: #f7f8f9;
+			z-index: 1;
+			box-shadow: -.1em 0 .25em rgba(0,0,0,.1) inset;
+		}
+		body:not(.toc-inline) #toc h2 {
+			margin-top: .8rem;
+			font-variant: small-caps;
+			font-variant: all-small-caps;
+			text-transform: lowercase;
+			font-weight: bold;
+			color: gray;
+			color: hsla(203,20%,40%,.7);
+		}
+
+		body:not(.toc-inline) {
+			padding-left: 29em;
+		}
+		/* See also Overflow section at the bottom */
+
+		body:not(.toc-inline) #toc-jump:not(:focus) {
+			width: 0;
+			height: 0;
+			padding: 0;
+			position: absolute;
+			overflow: hidden;
+		}
+	}
+	@media screen and (min-width: 90em) {
+		body:not(.toc-inline) {
+			margin: 0 4em;
+		}
+	}
+
+/******************************************************************************/
+/*                                Sectioning                                  */
+/******************************************************************************/
+
+/** Headings ******************************************************************/
+
+	h1, h2, h3, h4, h5, h6, dt {
+		page-break-after: avoid;
+		page-break-inside: avoid;
+		font: 100% sans-serif;   /* Reset all font styling to clear out UA styles */
+		font-family: inherit;    /* Inherit the font family. */
+		line-height: 1.2;        /* Keep wrapped headings compact */
+		hyphens: manual;         /* Hyphenated headings look weird */
+	}
+
+	h2, h3, h4, h5, h6 {
+		margin-top: 3rem;
+	}
+
+	h1, h2, h3 {
+		color: #005A9C;
+		background: transparent;
+	}
+
+	h1 { font-size: 170%; }
+	h2 { font-size: 140%; }
+	h3 { font-size: 120%; }
+	h4 { font-weight: bold; }
+	h5 { font-style: italic; }
+	h6 { font-variant: small-caps; }
+	dt { font-weight: bold; }
+
+/** Subheadings ***************************************************************/
+
+	h1 + h2,
+	#subtitle {
+		/* #subtitle is a subtitle in an H2 under the H1 */
+		margin-top: 0;
+	}
+	h2 + h3,
+	h3 + h4,
+	h4 + h5,
+	h5 + h6 {
+		margin-top: 1.2em; /* = 1 x line-height */
+	}
+
+/** Section divider ***********************************************************/
+
+	:not(.head) > hr {
+		font-size: 1.5em;
+		text-align: center;
+		margin: 1em auto;
+		height: auto;
+		border: transparent solid 0;
+		background: transparent;
+	}
+	:not(.head) > hr::before {
+		content: "\2727\2003\2003\2727\2003\2003\2727";
+	}
+
+/******************************************************************************/
+/*                            Paragraphs and Lists                            */
+/******************************************************************************/
+
+	p {
+		margin: 1em 0;
+	}
+
+	dd > p:first-child,
+	li > p:first-child {
+		margin-top: 0;
+	}
+
+	ul, ol {
+		margin-left: 0;
+		padding-left: 2em;
+	}
+
+	li {
+		margin: 0.25em 0 0.5em;
+		padding: 0;
+	}
+
+	dl dd {
+		margin: 0 0 .5em 2em;
+	}
+
+	.head dd + dd { /* compact for header */
+		margin-top: -.5em;
+	}
+
+	/* Style for algorithms */
+	ol.algorithm ol:not(.algorithm),
+	.algorithm > ol ol:not(.algorithm) {
+	 border-left: 0.5em solid #DEF;
+	}
+
+	/* Put nice boxes around each algorithm. */
+	[data-algorithm]:not(.heading) {
+	  padding: .5em;
+	  border: thin solid #ddd; border-radius: .5em;
+	  margin: .5em calc(-0.5em - 1px);
+	}
+	[data-algorithm]:not(.heading) > :first-child {
+	  margin-top: 0;
+	}
+	[data-algorithm]:not(.heading) > :last-child {
+	  margin-bottom: 0;
+	}
+
+	/* Style for switch/case <dl>s */
+	dl.switch > dd > ol.only,
+	dl.switch > dd > .only > ol {
+	 margin-left: 0;
+	}
+	dl.switch > dd > ol.algorithm,
+	dl.switch > dd > .algorithm > ol {
+	 margin-left: -2em;
+	}
+	dl.switch {
+	 padding-left: 2em;
+	}
+	dl.switch > dt {
+	 text-indent: -1.5em;
+	 margin-top: 1em;
+	}
+	dl.switch > dt + dt {
+	 margin-top: 0;
+	}
+	dl.switch > dt::before {
+	 content: '\21AA';
+	 padding: 0 0.5em 0 0;
+	 display: inline-block;
+	 width: 1em;
+	 text-align: right;
+	 line-height: 0.5em;
+	}
+
+/** Terminology Markup ********************************************************/
+
+
+/******************************************************************************/
+/*                                 Inline Markup                              */
+/******************************************************************************/
+
+/** Terminology Markup ********************************************************/
+	dfn   { /* Defining instance */
+		font-weight: bolder;
+	}
+	a > i { /* Instance of term */
+		font-style: normal;
+	}
+	dt dfn code, code.idl {
+		font-size: medium;
+	}
+	dfn var {
+		font-style: normal;
+	}
+
+/** Change Marking ************************************************************/
+
+	del { color: red;  text-decoration: line-through; }
+	ins { color: #080; text-decoration: underline;    }
+
+/** Miscellaneous improvements to inline formatting ***************************/
+
+	sup {
+		vertical-align: super;
+		font-size: 80%
+	}
+
+/******************************************************************************/
+/*                                    Code                                    */
+/******************************************************************************/
+
+/** General monospace/pre rules ***********************************************/
+
+	pre, code, samp {
+		font-family: Menlo, Consolas, "DejaVu Sans Mono", Monaco, monospace;
+		font-size: .9em;
+		page-break-inside: avoid;
+		hyphens: none;
+		text-transform: none;
+	}
+	pre code,
+	code code {
+		font-size: 100%;
+	}
+
+	pre {
+		margin-top: 1em;
+		margin-bottom: 1em;
+		overflow: auto;
+	}
+
+/** Inline Code fragments *****************************************************/
+
+  /* Do something nice. */
+
+/******************************************************************************/
+/*                                    Links                                   */
+/******************************************************************************/
+
+/** General Hyperlinks ********************************************************/
+
+	/* We hyperlink a lot, so make it less intrusive */
+	a[href] {
+		color: #034575;
+		text-decoration: none;
+		border-bottom: 1px solid #707070;
+		/* Need a bit of extending for it to look okay */
+		padding: 0 1px 0;
+		margin: 0 -1px 0;
+	}
+	a:visited {
+		border-bottom-color: #BBB;
+	}
+
+	/* Use distinguishing colors when user is interacting with the link */
+	a[href]:focus,
+	a[href]:hover {
+		background: #f8f8f8;
+		background: rgba(75%, 75%, 75%, .25);
+		border-bottom-width: 3px;
+		margin-bottom: -2px;
+	}
+	a[href]:active {
+		color: #C00;
+		border-color: #C00;
+	}
+
+	/* Backout above styling for W3C logo */
+	.head .logo,
+	.head .logo a {
+		border: none;
+		text-decoration: none;
+		background: transparent;
+	}
+
+/******************************************************************************/
+/*                                    Images                                  */
+/******************************************************************************/
+
+	img {
+		border-style: none;
+	}
+
+	/* For autogen numbers, add
+	   .caption::before, figcaption::before { content: "Figure " counter(figure) ". "; }
+	*/
+
+	figure, .figure, .sidefigure {
+		page-break-inside: avoid;
+		text-align: center;
+		margin: 2.5em 0;
+	}
+	.figure img,    .sidefigure img,    figure img,
+	.figure object, .sidefigure object, figure object {
+		max-width: 100%;
+		margin: auto;
+	}
+	.figure pre, .sidefigure pre, figure pre {
+		text-align: left;
+		display: table;
+		margin: 1em auto;
+	}
+	.figure table, figure table {
+		margin: auto;
+	}
+	@media screen and (min-width: 20em) {
+		.sidefigure {
+			float: right;
+			width: 50%;
+			margin: 0 0 0.5em 0.5em
+		}
+	}
+	.caption, figcaption, caption {
+		font-style: italic;
+		font-size: 90%;
+	}
+	.caption::before, figcaption::before, figcaption > .marker {
+		font-weight: bold;
+	}
+	.caption, figcaption {
+		counter-increment: figure;
+	}
+
+	/* DL list is indented 2em, but figure inside it is not */
+	dd > .figure, dd > figure { margin-left: -2em }
+
+/******************************************************************************/
+/*                             Colored Boxes                                  */
+/******************************************************************************/
+
+	.issue, .note, .example, .assertion, .advisement, blockquote {
+		padding: .5em;
+		border: .5em;
+		border-left-style: solid;
+		page-break-inside: avoid;
+	}
+	span.issue, span.note {
+		padding: .1em .5em .15em;
+		border-right-style: solid;
+	}
+
+	.issue,
+	.note,
+	.example,
+	.advisement,
+	.assertion,
+	blockquote {
+		margin: 1em auto;
+	}
+	.note  > p:first-child,
+	.issue > p:first-child,
+	blockquote > :first-child {
+		margin-top: 0;
+	}
+	blockquote > :last-child {
+		margin-bottom: 0;
+	}
+
+/** Blockquotes ***************************************************************/
+
+	blockquote {
+		border-color: silver;
+	}
+
+/** Open issue ****************************************************************/
+
+	.issue {
+		border-color: #E05252;
+		background: #FBE9E9;
+		counter-increment: issue;
+		overflow: auto;
+	}
+	.issue::before, .issue > .marker {
+		text-transform: uppercase;
+		color: #AE1E1E;
+		padding-right: 1em;
+		text-transform: uppercase;
+	}
+	/* Add .issue::before { content: "Issue " counter(issue) " "; } for autogen numbers,
+	   or use class="marker" to mark up the issue number in source. */
+
+/** Example *******************************************************************/
+
+	.example {
+		border-color: #E0CB52;
+		background: #FCFAEE;
+		counter-increment: example;
+		overflow: auto;
+		clear: both;
+	}
+	.example::before, .example > .marker {
+		text-transform: uppercase;
+		color: #827017;
+		min-width: 7.5em;
+		display: block;
+	}
+	/* Add .example::before { content: "Example " counter(example) " "; } for autogen numbers,
+	   or use class="marker" to mark up the example number in source. */
+
+/** Non-normative Note ********************************************************/
+
+	.note {
+		border-color: #52E052;
+		background: #E9FBE9;
+		overflow: auto;
+	}
+
+	.note::before, .note > .marker,
+	details.note > summary::before,
+	details.note > summary > .marker {
+		text-transform: uppercase;
+		display: block;
+		color: hsl(120, 70%, 30%);
+	}
+	/* Add .note::before { content: "Note"; } for autogen label,
+	   or use class="marker" to mark up the label in source. */
+
+	details.note > summary {
+		display: block;
+		color: hsl(120, 70%, 30%);
+	}
+	details.note[open] > summary {
+		border-bottom: 1px silver solid;
+	}
+
+/** Assertion Box *************************************************************/
+	/*  for assertions in algorithms */
+
+	.assertion {
+		border-color: #AAA;
+		background: #EEE;
+	}
+
+/** Advisement Box ************************************************************/
+	/*  for attention-grabbing normative statements */
+
+	.advisement {
+		border-color: orange;
+		border-style: none solid;
+		background: #FFEECC;
+	}
+	strong.advisement {
+		display: block;
+		text-align: center;
+	}
+	.advisement > .marker {
+		color: #B35F00;
+	}
+
+/** Spec Obsoletion Notice ****************************************************/
+	/* obnoxious obsoletion notice for older/abandoned specs. */
+
+	details {
+		display: block;
+	}
+	summary {
+		font-weight: bolder;
+	}
+
+	.annoying-warning:not(details),
+	details.annoying-warning:not([open]) > summary,
+	details.annoying-warning[open] {
+		background: #fdd;
+		color: red;
+		font-weight: bold;
+		padding: .75em 1em;
+		border: thick red;
+		border-style: solid;
+		border-radius: 1em;
+	}
+	.annoying-warning :last-child {
+		margin-bottom: 0;
+	}
+
+@media not print {
+	details.annoying-warning[open] {
+		position: fixed;
+		left: 1em;
+		right: 1em;
+		bottom: 1em;
+		z-index: 1000;
+	}
+}
+
+	details.annoying-warning:not([open]) > summary {
+		text-align: center;
+	}
+
+/** Entity Definition Boxes ***************************************************/
+
+	.def {
+		padding: .5em 1em;
+		background: #DEF;
+		margin: 1.2em 0;
+		border-left: 0.5em solid #8CCBF2;
+	}
+
+/******************************************************************************/
+/*                                    Tables                                  */
+/******************************************************************************/
+
+	th, td {
+		text-align: left;
+		text-align: start;
+	}
+
+/** Property/Descriptor Definition Tables *************************************/
+
+	table.def {
+		/* inherits .def box styling, see above */
+		width: 100%;
+		border-spacing: 0;
+	}
+
+	table.def td,
+	table.def th {
+		padding: 0.5em;
+		vertical-align: baseline;
+		border-bottom: 1px solid #bbd7e9;
+	}
+
+	table.def > tbody > tr:last-child th,
+	table.def > tbody > tr:last-child td {
+		border-bottom: 0;
+	}
+
+	table.def th {
+		font-style: italic;
+		font-weight: normal;
+		padding-left: 1em;
+		width: 3em;
+	}
+
+	/* For when values are extra-complex and need formatting for readability */
+	table td.pre {
+		white-space: pre-wrap;
+	}
+
+	/* A footnote at the bottom of a def table */
+	table.def           td.footnote {
+		padding-top: 0.6em;
+	}
+	table.def           td.footnote::before {
+		content: " ";
+		display: block;
+		height: 0.6em;
+		width: 4em;
+		border-top: thin solid;
+	}
+
+/** Data tables (and properly marked-up index tables) *************************/
+	/*
+		 <table class="data"> highlights structural relationships in a table
+		 when correct markup is used (e.g. thead/tbody, th vs. td, scope attribute)
+
+		 Use class="complex data" for particularly complicated tables --
+		 (This will draw more lines: busier, but clearer.)
+
+		 Use class="long" on table cells with paragraph-like contents
+		 (This will adjust text alignment accordingly.)
+		 Alternately use class="longlastcol" on tables, to have the last column assume "long".
+	*/
+
+	table {
+		word-wrap: normal;
+		overflow-wrap: normal;
+		hyphens: manual;
+	}
+
+	table.data,
+	table.index {
+		margin: 1em auto;
+		border-collapse: collapse;
+		border: hidden;
+		width: 100%;
+	}
+	table.data caption,
+	table.index caption {
+		max-width: 50em;
+		margin: 0 auto 1em;
+	}
+
+	table.data td,  table.data th,
+	table.index td, table.index th {
+		padding: 0.5em 1em;
+		border-width: 1px;
+		border-color: silver;
+		border-top-style: solid;
+	}
+
+	table.data thead td:empty {
+		padding: 0;
+		border: 0;
+	}
+
+	table.data  thead,
+	table.index thead,
+	table.data  tbody,
+	table.index tbody {
+		border-bottom: 2px solid;
+	}
+
+	table.data colgroup,
+	table.index colgroup {
+		border-left: 2px solid;
+	}
+
+	table.data  tbody th:first-child,
+	table.index tbody th:first-child  {
+		border-right: 2px solid;
+		border-top: 1px solid silver;
+		padding-right: 1em;
+	}
+
+	table.data th[colspan],
+	table.data td[colspan] {
+		text-align: center;
+	}
+
+	table.complex.data th,
+	table.complex.data td {
+		border: 1px solid silver;
+		text-align: center;
+	}
+
+	table.data.longlastcol td:last-child,
+	table.data td.long {
+	 vertical-align: baseline;
+	 text-align: left;
+	}
+
+	table.data img {
+		vertical-align: middle;
+	}
+
+
+/*
+Alternate table alignment rules
+
+	table.data,
+	table.index {
+		text-align: center;
+	}
+
+	table.data  thead th[scope="row"],
+	table.index thead th[scope="row"] {
+		text-align: right;
+	}
+
+	table.data  tbody th:first-child,
+	table.index tbody th:first-child  {
+		text-align: right;
+	}
+
+Possible extra rowspan handling
+
+	table.data  tbody th[rowspan]:not([rowspan='1']),
+	table.index tbody th[rowspan]:not([rowspan='1']),
+	table.data  tbody td[rowspan]:not([rowspan='1']),
+	table.index tbody td[rowspan]:not([rowspan='1']) {
+		border-left: 1px solid silver;
+	}
+
+	table.data  tbody th[rowspan]:first-child,
+	table.index tbody th[rowspan]:first-child,
+	table.data  tbody td[rowspan]:first-child,
+	table.index tbody td[rowspan]:first-child{
+		border-left: 0;
+		border-right: 1px solid silver;
+	}
+*/
+
+/******************************************************************************/
+/*                                  Indices                                   */
+/******************************************************************************/
+
+
+/** Table of Contents *********************************************************/
+
+	.toc a {
+		/* More spacing; use padding to make it part of the click target. */
+		padding-top: 0.1rem;
+		/* Larger, more consistently-sized click target */
+		display: block;
+		/* Reverse color scheme */
+		color: black;
+		border-color: #3980B5;
+		border-bottom-width: 3px !important;
+		margin-bottom: 0px !important;
+	}
+	.toc a:visited {
+		border-color: #054572;
+	}
+	.toc a:not(:focus):not(:hover) {
+		/* Allow colors to cascade through from link styling */
+		border-bottom-color: transparent;
+	}
+
+	.toc, .toc ol, .toc ul, .toc li {
+		list-style: none; /* Numbers must be inlined into source */
+		/* because generated content isn't search/selectable and markers can't do multilevel yet */
+		margin:  0;
+		padding: 0;
+		line-height: 1.1rem; /* consistent spacing */
+	}
+
+	/* ToC not indented until third level, but font style & margins show hierarchy */
+	.toc > li             { font-weight: bold;   }
+	.toc > li li          { font-weight: normal; }
+	.toc > li li li       { font-size:   95%;    }
+	.toc > li li li li    { font-size:   90%;    }
+	.toc > li li li li .secno { font-size: 85%; }
+	.toc > li li li li li { font-size:   85%;    }
+	.toc > li li li li li .secno { font-size: 100%; }
+
+	/* @supports not (display:grid) { */
+		.toc > li             { margin: 1.5rem 0;    }
+		.toc > li li          { margin: 0.3rem 0;    }
+		.toc > li li li       { margin-left: 2rem;   }
+
+		/* Section numbers in a column of their own */
+		.toc .secno {
+			float: left;
+			width: 4rem;
+			white-space: nowrap;
+		}
+
+		.toc li {
+			clear: both;
+		}
+
+		:not(li) > .toc              { margin-left:  5rem; }
+		.toc .secno                  { margin-left: -5rem; }
+		.toc > li li li .secno       { margin-left: -7rem; }
+		.toc > li li li li .secno    { margin-left: -9rem; }
+		.toc > li li li li li .secno { margin-left: -11rem; }
+
+		/* Tighten up indentation in narrow ToCs */
+		@media (max-width: 30em) {
+			:not(li) > .toc              { margin-left:  4rem; }
+			.toc .secno                  { margin-left: -4rem; }
+			.toc > li li li              { margin-left:  1rem; }
+			.toc > li li li .secno       { margin-left: -5rem; }
+			.toc > li li li li .secno    { margin-left: -6rem; }
+			.toc > li li li li li .secno { margin-left: -7rem; }
+		}
+	/* } */
+
+	@supports (display:grid) {
+		/* Use #toc over .toc to override non-@supports rules. */
+		#toc {
+			display: grid;
+			align-content: start;
+			grid-template-columns: auto 1fr;
+			grid-column-gap: 1rem;
+			column-gap: 1rem;
+			grid-row-gap: .6rem;
+			row-gap: .6rem;
+		}
+		#toc h2 {
+			grid-column: 1 / -1;
+			margin-bottom: 0;
+		}
+		#toc ol,
+		#toc li,
+		#toc a {
+			display: contents;
+			/* Switch <a> to subgrid when supported */
+		}
+		#toc span {
+			margin: 0;
+		}
+		#toc > .toc > li > a > span {
+			/* The spans of the top-level list,
+			   comprising the first items of each top-level section. */
+			margin-top: 1.1rem;
+		}
+		#toc#toc .secno { /* Ugh, need more specificity to override base.css */
+			grid-column: 1;
+			width: auto;
+			margin-left: 0;
+		}
+		#toc .content {
+			grid-column: 2;
+			width: auto;
+			margin-right: 1rem;
+		}
+		#toc .content:hover {
+			background: rgba(75%, 75%, 75%, .25);
+			border-bottom: 3px solid #054572;
+			margin-bottom: -3px;
+		}
+		#toc li li li .content {
+			margin-left: 1rem;
+		}
+		#toc li li li li .content {
+			margin-left: 2rem;
+		}
+	}
+
+
+/** Index *********************************************************************/
+
+	/* Index Lists: Layout */
+	ul.index       { margin-left: 0; columns: 15em; text-indent: 1em hanging; }
+	ul.index li    { margin-left: 0; list-style: none; break-inside: avoid; }
+	ul.index li li { margin-left: 1em }
+	ul.index dl    { margin-top: 0; }
+	ul.index dt    { margin: .2em 0 .2em 20px;}
+	ul.index dd    { margin: .2em 0 .2em 40px;}
+	/* Index Lists: Typography */
+	ul.index ul,
+	ul.index dl { font-size: smaller; }
+	@media not print {
+		ul.index li span {
+			white-space: nowrap;
+			color: transparent; }
+		ul.index li a:hover + span,
+		ul.index li a:focus + span {
+			color: #707070;
+		}
+	}
+
+/** Index Tables *****************************************************/
+	/* See also the data table styling section, which this effectively subclasses */
+
+	table.index {
+		font-size: small;
+		border-collapse: collapse;
+		border-spacing: 0;
+		text-align: left;
+		margin: 1em 0;
+	}
+
+	table.index td,
+	table.index th {
+		padding: 0.4em;
+	}
+
+	table.index tr:hover td:not([rowspan]),
+	table.index tr:hover th:not([rowspan]) {
+		background: #f7f8f9;
+	}
+
+	/* The link in the first column in the property table (formerly a TD) */
+	table.index th:first-child a {
+		font-weight: bold;
+	}
+
+/******************************************************************************/
+/*                                    Print                                   */
+/******************************************************************************/
+
+	@media print {
+		/* Pages have their own margins. */
+		html {
+			margin: 0;
+		}
+		/* Serif for print. */
+		body {
+			font-family: serif;
+		}
+	}
+	@page {
+		margin: 1.5cm 1.1cm;
+	}
+
+/******************************************************************************/
+/*                                    Legacy                                  */
+/******************************************************************************/
+
+	/* This rule is inherited from past style sheets. No idea what it's for. */
+	.hide { display: none }
+
+
+
+/******************************************************************************/
+/*                             Overflow Control                               */
+/******************************************************************************/
+
+	.figure .caption, .sidefigure .caption, figcaption {
+		/* in case figure is overlarge, limit caption to 50em */
+		max-width: 50rem;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.overlarge > table {
+		/* limit preferred width of table */
+		max-width: 50em;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	@media (min-width: 55em) {
+		.overlarge {
+			margin-left: calc(13px + 26.5rem - 50vw);
+			margin-right: calc(13px + 26.5rem - 50vw);
+			max-width: none;
+		}
+	}
+	@media screen and (min-width: 78em) {
+		body:not(.toc-inline) .overlarge {
+			/* 30.5em body padding 50em content area */
+			margin-left: calc(40em - 50vw) !important;
+			margin-right: calc(40em - 50vw) !important;
+		}
+	}
+	@media screen and (min-width: 90em) {
+		body:not(.toc-inline) .overlarge {
+			/* 4em html margin 30.5em body padding 50em content area */
+			margin-left: 0 !important;
+			margin-right: calc(84.5em - 100vw) !important;
+		}
+	}
+
+	@media not print {
+		.overlarge {
+			overflow-x: auto;
+			/* See Lea Verou's explanation background-attachment:
+			 * http://lea.verou.me/2012/04/background-attachment-local/
+			 *
+			background: top left  / 4em 100% linear-gradient(to right,  #ffffff, rgba(255, 255, 255, 0)) local,
+			            top right / 4em 100% linear-gradient(to left, #ffffff, rgba(255, 255, 255, 0)) local,
+			            top left  / 1em 100% linear-gradient(to right,  #c3c3c5, rgba(195, 195, 197, 0)) scroll,
+			            top right / 1em 100% linear-gradient(to left, #c3c3c5, rgba(195, 195, 197, 0)) scroll,
+			            white;
+			background-repeat: no-repeat;
+			*/
+		}
+	}
+</style>
+<style type="text/css">
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      vertical-align: top;
+    }
+    th, td {
+      border-left: none;
+      border-right: none;
+      padding: 0px 10px;
+    }
+    th {
+      text-align: center;
+    }
+  </style>
+  <meta content="Bikeshed version f9fa604b61e5fc96edf5cdebd2c04e0e69b33a7b" name="generator">
+  <link href="https://isocpp.org/favicon.ico" rel="icon">
+  <meta content="27af0a718b4feed741fc25ba7d9004eaf2907ebc" name="document-revision">
+<style>/* style-md-lists */
+
+/* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+[data-md] > :first-child {
+    margin-top: 0;
+}
+[data-md] > :last-child {
+    margin-bottom: 0;
+}</style>
+<style>/* style-counters */
+
+body {
+    counter-reset: example figure issue;
+}
+.issue {
+    counter-increment: issue;
+}
+.issue:not(.no-marker)::before {
+    content: "Issue " counter(issue);
+}
+
+.example {
+    counter-increment: example;
+}
+.example:not(.no-marker)::before {
+    content: "Example " counter(example);
+}
+.invalid.example:not(.no-marker)::before,
+.illegal.example:not(.no-marker)::before {
+    content: "Invalid Example" counter(example);
+}
+
+figcaption {
+    counter-increment: figure;
+}
+figcaption:not(.no-marker)::before {
+    content: "Figure " counter(figure) " ";
+}</style>
+<style>/* style-syntax-highlighting */
+
+.highlight:not(.idl) { background: hsl(24, 20%, 95%); }
+code.highlight { padding: .1em; border-radius: .3em; }
+pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em 0; overflow: auto; border-radius: 0; }
+c-[a] { color: #990055 } /* Keyword.Declaration */
+c-[b] { color: #990055 } /* Keyword.Type */
+c-[c] { color: #708090 } /* Comment */
+c-[d] { color: #708090 } /* Comment.Multiline */
+c-[e] { color: #0077aa } /* Name.Attribute */
+c-[f] { color: #669900 } /* Name.Tag */
+c-[g] { color: #222222 } /* Name.Variable */
+c-[k] { color: #990055 } /* Keyword */
+c-[l] { color: #000000 } /* Literal */
+c-[m] { color: #000000 } /* Literal.Number */
+c-[n] { color: #0077aa } /* Name */
+c-[o] { color: #999999 } /* Operator */
+c-[p] { color: #999999 } /* Punctuation */
+c-[s] { color: #a67f59 } /* Literal.String */
+c-[t] { color: #a67f59 } /* Literal.String.Single */
+c-[u] { color: #a67f59 } /* Literal.String.Double */
+c-[cp] { color: #708090 } /* Comment.Preproc */
+c-[c1] { color: #708090 } /* Comment.Single */
+c-[cs] { color: #708090 } /* Comment.Special */
+c-[kc] { color: #990055 } /* Keyword.Constant */
+c-[kn] { color: #990055 } /* Keyword.Namespace */
+c-[kp] { color: #990055 } /* Keyword.Pseudo */
+c-[kr] { color: #990055 } /* Keyword.Reserved */
+c-[ld] { color: #000000 } /* Literal.Date */
+c-[nc] { color: #0077aa } /* Name.Class */
+c-[no] { color: #0077aa } /* Name.Constant */
+c-[nd] { color: #0077aa } /* Name.Decorator */
+c-[ni] { color: #0077aa } /* Name.Entity */
+c-[ne] { color: #0077aa } /* Name.Exception */
+c-[nf] { color: #0077aa } /* Name.Function */
+c-[nl] { color: #0077aa } /* Name.Label */
+c-[nn] { color: #0077aa } /* Name.Namespace */
+c-[py] { color: #0077aa } /* Name.Property */
+c-[ow] { color: #999999 } /* Operator.Word */
+c-[mb] { color: #000000 } /* Literal.Number.Bin */
+c-[mf] { color: #000000 } /* Literal.Number.Float */
+c-[mh] { color: #000000 } /* Literal.Number.Hex */
+c-[mi] { color: #000000 } /* Literal.Number.Integer */
+c-[mo] { color: #000000 } /* Literal.Number.Oct */
+c-[sb] { color: #a67f59 } /* Literal.String.Backtick */
+c-[sc] { color: #a67f59 } /* Literal.String.Char */
+c-[sd] { color: #a67f59 } /* Literal.String.Doc */
+c-[se] { color: #a67f59 } /* Literal.String.Escape */
+c-[sh] { color: #a67f59 } /* Literal.String.Heredoc */
+c-[si] { color: #a67f59 } /* Literal.String.Interpol */
+c-[sx] { color: #a67f59 } /* Literal.String.Other */
+c-[sr] { color: #a67f59 } /* Literal.String.Regex */
+c-[ss] { color: #a67f59 } /* Literal.String.Symbol */
+c-[vc] { color: #0077aa } /* Name.Variable.Class */
+c-[vg] { color: #0077aa } /* Name.Variable.Global */
+c-[vi] { color: #0077aa } /* Name.Variable.Instance */
+c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
+</style>
+<style>/* style-selflinks */
+
+.heading, .issue, .note, .example, li, dt {
+    position: relative;
+}
+a.self-link {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * (3.5rem - 26px));
+    width: calc(3.5rem - 26px);
+    height: 2em;
+    text-align: center;
+    border: none;
+    transition: opacity .2s;
+    opacity: .5;
+}
+a.self-link:hover {
+    opacity: 1;
+}
+.heading > a.self-link {
+    font-size: 83%;
+}
+li > a.self-link {
+    left: calc(-1 * (3.5rem - 26px) - 2em);
+}
+dfn > a.self-link {
+    top: auto;
+    left: auto;
+    opacity: 0;
+    width: 1.5em;
+    height: 1.5em;
+    background: gray;
+    color: white;
+    font-style: normal;
+    transition: opacity .2s, background-color .2s, color .2s;
+}
+dfn:hover > a.self-link {
+    opacity: 1;
+}
+dfn > a.self-link:hover {
+    color: black;
+}
+
+a.self-link::before            { content: "¶"; }
+.heading > a.self-link::before { content: "§"; }
+dfn > a.self-link::before      { content: "#"; }</style>
+<style>/* style-autolinks */
+
+.css.css, .property.property, .descriptor.descriptor {
+    color: #005a9c;
+    font-size: inherit;
+    font-family: inherit;
+}
+.css::before, .property::before, .descriptor::before {
+    content: "‘";
+}
+.css::after, .property::after, .descriptor::after {
+    content: "’";
+}
+.property, .descriptor {
+    /* Don't wrap property and descriptor names */
+    white-space: nowrap;
+}
+.type { /* CSS value <type> */
+    font-style: italic;
+}
+pre .property::before, pre .property::after {
+    content: "";
+}
+[data-link-type="property"]::before,
+[data-link-type="propdesc"]::before,
+[data-link-type="descriptor"]::before,
+[data-link-type="value"]::before,
+[data-link-type="function"]::before,
+[data-link-type="at-rule"]::before,
+[data-link-type="selector"]::before,
+[data-link-type="maybe"]::before {
+    content: "‘";
+}
+[data-link-type="property"]::after,
+[data-link-type="propdesc"]::after,
+[data-link-type="descriptor"]::after,
+[data-link-type="value"]::after,
+[data-link-type="function"]::after,
+[data-link-type="at-rule"]::after,
+[data-link-type="selector"]::after,
+[data-link-type="maybe"]::after {
+    content: "’";
+}
+
+[data-link-type].production::before,
+[data-link-type].production::after,
+.prod [data-link-type]::before,
+.prod [data-link-type]::after {
+    content: "";
+}
+
+[data-link-type=element],
+[data-link-type=element-attr] {
+    font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    font-size: .9em;
+}
+[data-link-type=element]::before { content: "<" }
+[data-link-type=element]::after  { content: ">" }
+
+[data-link-type=biblio] {
+    white-space: pre;
+}</style>
+ <body class="h-entry">
+  <div class="head">
+   <p data-fill-with="logo"></p>
+   <h1 class="p-name no-ref" id="title">TODOR0<br>Unbounded-Precision Integer Types</h1>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">New Proposal, <time class="dt-updated" datetime="2019-04-24">2019-04-24</time></span></h2>
+   <div data-fill-with="spec-metadata">
+    <dl>
+     <dt>Authors:
+     <dd>
+      <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="zamazan4ik@tut.by">Alexander Zaitsev</a> (<span class="p-org org">Solarwinds</span>) <a class="u-email email" href="mailto:zamazan4ik@tut.by">zamazan4ik@tut.by</a>
+     <dd>
+      <dd class="editor p-author h-card vcard"><a class="p-name fn u-url url" href="antoshkka@yandex-team.ru">Antony Polukhin</a> (<span class="p-org org">Yandex Taxi</span>) <a class="u-email email" href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>
+     <dt>Project:
+     <dd>ISO/IEC JTC1/SC22/WG21 14882: Programming Language — C++
+     <dt>Audience:
+     <dd>LEWGI, LEWG, LWG
+     <dt>Source:
+     <dd>https://github.com/ZaMaZaN4iK/ConfsANDProps/blob/master/Proposals/unbounded_integer/unbounded_integer.bs
+    </dl>
+   </div>
+   <div data-fill-with="warning"></div>
+   <hr title="Separator for header">
+  </div>
+  <div class="p-summary" data-fill-with="abstract">
+   <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
+   <p>In Standard library we already have std::hash specializations for some classes like std::string. Unfortunately, we have no specializations for a lot of other classes from Standard Library like std::array, std::tuple, etc. At the moment people who need hash calucations for such containers must use Boost.Hash functions or write std::hash specialization manually. This proposal adds std::hash specializations for different containers from Standard Library. Addresses an issue LWG #1025.</p>
+  </div>
+  <nav data-fill-with="table-of-contents" id="toc">
+   <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
+   <ol class="toc" role="directory">
+    <li><a href="#issues"><span class="secno">1</span> <span class="content">Issues</span></a>
+    <li><a href="#overview"><span class="secno">2</span> <span class="content">Overview</span></a>
+    <li><a href="#design_considerations"><span class="secno">3</span> <span class="content">Design considerations</span></a>
+    <li><a href="#design_overview"><span class="secno">4</span> <span class="content">Design overview</span></a>
+    <li><a href="#wording"><span class="secno">5</span> <span class="content">Proposed wording</span></a>
+    <li><a href="#impl"><span class="secno">6</span> <span class="content">Possible implementation</span></a>
+    <li><a href="#other_lang"><span class="secno">7</span> <span class="content">Other programming languages</span></a>
+    <li><a href="#references"><span class="secno">8</span> <span class="content">References</span></a>
+   </ol>
+  </nav>
+  <main>
+   <h2 class="heading settled" data-level="1" id="issues"><span class="secno">1. </span><span class="content">Issues</span><a class="self-link" href="#issues"></a></h2>
+   <ol>
+    <li data-md>
+     <p>Allocators -- unbounded-precision integer types need to manage memory on the free store to hold their data. This suggests that users should be able to specify an allocator. But templatizing these types on an allocator would require that all of the arithmetic operations provide overloads for all of the standard integer types, because function template instantiation requires exact type matches, without conversions.</p>
+    <li data-md>
+     <p>[new in N3417] Rvalue overloads for arithmetic operations (Joe Gottman) -- many of the operations on the unbounded-precision types can be made more efficient by providing overloaded versions that take rvalue references. For example:</p>
+<pre class="highlight"><c- n>integer</c-> <c- k>operator</c-><c- o>+</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- p>{</c->
+    <c- k>return</c-> <c- n>std</c-><c- o>::</c-><c- n>move</c-><c- p>(</c-><c- n>lsh</c-> <c- o>+=</c-> <c- n>rhs</c-><c- p>);</c->
+<c- p>}</c->
+</pre>
+    <li data-md>
+     <p>[new in N3417] Support user-defined literals (Alisdair Meredith, Marc Glisse) -- obviously useful, but users might expect them to be constexpr, which they cannot, in general, be, because they need to allocate memory.</p>
+    <li data-md>
+     <p>[new in N3417] Add constexpr specifications as appropriate (Alisdair Meredith) -- although most functions can allocate memory, there are a few that could be marked constexpr. It’s not clear how useful this would be.</p>
+    <li data-md>
+     <p>[new in N3417] Converting to a string could use a mechanism for providing an allocator (Alisdair Meredith) -- for example,</p>
+<pre class="highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>charT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-><c- o>></c->
+<c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>load</c-><c- p>(</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>charT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>&amp;</c-><c- p>);</c->
+</pre>
+    <li data-md>
+     <p>[new in N3417] powmod should be specified to run in constant time with identical cache access patterns for arguments of the same size (Jack Lloyd) -- this is important for cryptographic purposes, to avoid side-channel attacks. Marc Glisse: Please no. Side-channel silent operations belong in a separate proposal, with separate functions. Most applications prefer an operation with a running time that can vary between 1 and 5 to an operation with running time 20. Now feel free to either propose an integer_sec type or powmod_sec etc variants of all the operations, but note also that in crypto the size is often known at compile-time, so a dynamically-sized type may not be the best.</p>
+    <li data-md>
+     <p>[new in N3417] Need functions to interconvert with byte arrays (Jack Lloyd) -- quite a common need in cryptographic operations.</p>
+    <li data-md>
+     <p>[new in N3417] Rounding of divisions and right shifts needs to be specified. (Marc Glisse) -- even if it’s obvious. Also, does mod return negative values?</p>
+    <li data-md>
+     <p>[new in N3965] Provide interoperability with fixed point.</p>
+    <li data-md>
+     <p>[new in N3965] What happens when integer_data_proxy::operator[] is called with an index that is out of bounds?</p>
+    <li data-md>
+     <p>[new in N4038] Should bits objects initialized with negative values hold the twos-complement representation instead of the ones-complement? (Jean-Marc Bourguet)</p>
+    <li data-md>
+     <p>[new in N4038] Should integer::to_string convert to a templated basic_string instead of std::string?</p>
+    <li data-md>
+     <p>[new in N4038] Should bits support expression templates? Should expression template support be dropped? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] Should small-object optimization requirement allow stealing a bit to indicate whether it is in use (i.e., reduce required value range for this optimization)? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] No integer+int because of the small number optimization: could we mention (in a note?) if it is acceptable to provide those hundreds of overloads? It can make make some code ambiguous, so it isn’t "as if". (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] div should return an integer_div_t with members quot and rem. (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] sqrt: if you want many functions, you could add sqrtrem that also returns the remainder. Also, factorial, binomial coefficients. (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] Is overflow behavior specified in any way? (Marc Glisse)</p>
+    <li data-md>
+     <p>
+      [new in N4038] Why forbid explicit cast to int? If I have an integer and want to know if it fits into a long long, I should cast it inside try-catch. The cast itself will be implemented as if(fits)cast;else throw;. So I am going to have to throw and catch an exception just to know if it fits. I hope that some day compilers will be able to optimize away exceptions in such trivial cases, but it isn’t the case yet with those I tried. In the mean time, a function i.fits
+      <int>() could help. (Marc Glisse)</int>
+     </p>
+    <li data-md>
+     <p>[new in N4038] What operations are guaranteed to be done in-place, i.e. what’s the point of capacity/reserve? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] Does gcd always return a non-negative number? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] integer(numeric_limits::infinity()): does it throw something? (I assume that’s why there is no "noexcept") (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] operator long double: if type long double has no infinity, use max (from numeric_limits) instead? (Marc Glisse) (PJB): or maybe HUGE_VALL?</p>
+    <li data-md>
+     <p>[new in N4038] pow: 0^0 is 1? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] integer_data_proxy::size and integer_data_proxy::capacity should return the number of words in the sequence. (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] is element access through integer_data_proxy big endian or little endian? (Marc Glisse) (PJB:) little endian. Needs to be specified.</p>
+    <li data-md>
+     <p>[new in N4038] should remove access to internals of integer. (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] should bits have a data_proxy interface, like integer_data_proxy? or iteration? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] <code class="highlight"><c- n>bits</c-><c- o>::</c-><c- n>capacity</c-></code>: "number of bits that the object can represent": it represents an infinite number of bits Maybe make it more precise? (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] There are still some <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>string</c-></code> (not templated) around. (Marc Glisse)</p>
+    <li data-md>
+     <p>[new in N4038] Should bits have conversions to/from <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>bitset</c-></code> and <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- b>bool</c-><c- o>></c-></code>? (Marc Glisse)</p>
+   </ol>
+   <h2 class="heading settled" data-level="2" id="overview"><span class="secno">2. </span><span class="content">Overview</span><a class="self-link" href="#overview"></a></h2>
+   <p>Programmers sometimes need to manipulate integer values that are too large to repesent with C++’s standard integer types. Doing a Google search for terms that describe large integers produces many hits for libraries that handle large integers. These libraries vary in quality, from hacks by beginners to sophisticated, professional implementations. Also, Java has unbounded precision integers as part of its standard class library.</p>
+   <p>One important use for unbounded-precision integers is cryptography. Cryptographic applications typically manipulate integer values of several hundred digits. If the C++ standard library provides facilities for such values it will make cryptographic applications easier to write and to port.</p>
+   <p>There have been two Committee papers proposing unbounded-precision integer libraries for C++: N1718 (2004) and N2143 (2007), both by M.J. Kronenburg. Nothing was done with these papers, in part because there was too much else going on in the Library Working Group at the time. Now that the Committee is looking to greatly expand the scope of the standard library, it’s time to reconsider unbounded-precision integers. Also there is a paper N4038 (2014) from Pete Becker. And nothing is done too, unfortunately. This proposal is based mostly on N4038.</p>
+   <h2 class="heading settled" data-level="3" id="design_considerations"><span class="secno">3. </span><span class="content">Design considerations</span><a class="self-link" href="#design_considerations"></a></h2>
+   <p>An unbounded-precision integer type is an integer type that does not impose pre-defined limits on the precision of the values that it can represent. Of course, in practice, unbounded precision can’t be achieved; sooner or later the system runs out of resources. So unbounded in this context means bounded only by the availability of system resources; there is no hard-coded limit to the number of digits in the value that an unbounded-precision integer type can represent.</p>
+   <p>Unbounded-precision integer types should interoperate with C++’s built-in integer types. Applying arithmetic operations to a mix of standard integer types and unbounded-precision integer types should just work. And to the extent possible, operations that can be applied to standard integer types should also be applicable, using the same syntax, to unbounded-precision integer types.</p>
+   <p>Unbounded-precision integer types should also provide operations that facilitate their use in areas that demand such types. Since there is a potentially unbounded list of operations that could be useful in applications that need unbounded-precision integer types, it is not practical to provide every useful operation. This proposal presents a small set of required operations and provides a facility for users to write their own extensions.</p>
+   <h2 class="heading settled" data-level="4" id="design_overview"><span class="secno">4. </span><span class="content">Design overview</span><a class="self-link" href="#design_overview"></a></h2>
+   <p>This paper proposes two unbounded-precision integer types. The type integer represents signed integer values. The type bits represents an unbounded set of bit values.</p>
+   <p>To support interoperability, objects of either type can be constructed from values of any of the standard integer types. So code like this just works:</p>
+<pre class="highlight">    <c- n>integer</c-> <c- n>i</c-> <c- o>=</c-> <c- mi>30000</c-><c- p>;</c->
+    <c- n>integer</c-> <c- n>j</c-> <c- o>=</c-> <c- mi>1000</c-> <c- o>*</c-> <c- n>i</c-><c- p>;</c->
+
+    <c- n>bits</c-> <c- n>b</c-> <c- o>=</c-> <c- mh>0xFF</c-><c- p>;</c->
+    <c- n>bits</c-> <c- n>c</c-> <c- o>=</c-> <c- n>b</c-> <c- o>&amp;</c-> <c- mh>0xAA</c-><c- p>;</c->
+</pre>
+   Converting a negative number to an object of type bits sets the number to the complement of this initializer, so this code just works: 
+<pre class="highlight">    <c- n>bits</c-> <c- n>b</c-> <c- o>=</c-> <c- o>-</c-><c- mi>3</c-><c- p>;</c-> <c- c1>// sets b to ...11111100</c->
+</pre>
+   This is easily implemented by storing a finite set of 1 bits (in this case, 0x03) and using a flag to indicate whether the actual value is represented by that set of bits or by its complement. 
+   <p>As currently specified, neither integer nor bits provides overloaded operators that take standard integer types. When an operation is applied to a standard integer type and an integer object or a bits object, the standard integer operand is converted to the appropriate unbounded-precision integer type and the operation is applied to the result. It is assumed that implementations will make this kind of mixed operation efficient by implementing a small-integer optimization, storing small values directly in the integer or bits object, and using heap storage when needed for larger values. This greatly simplifies the interface specification.</p>
+   <p>Objects of these types can be constructed from string representations (with the usual range of possible bases) and from an initializer list that holds unsigned 32-bit values.</p>
+   <p>Objects of type integer can also be constructed from values of floating-point types.</p>
+   <p>Values of type integer and of type bits can be freely inter-converted.</p>
+   <p>Bit manipulations on bits objects treat the value as having an unbounded number of bits above the highest bit stored in the object. As a result, the usual bit operations, &amp;, |, and ^, can be applied to values of different sizes. Further, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>seminumeric</c-><c- o>::</c-><c- n>bits</c-></code> can be used as a replacement for <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>bitset</c-></code> when limiting the object to a fixed number of bits is undesirable.</p>
+   <h2 class="heading settled" data-level="5" id="wording"><span class="secno">5. </span><span class="content">Proposed wording</span><a class="self-link" href="#wording"></a></h2>
+   <p>
+    Header 
+    <seminumeric> synopsis</seminumeric>
+   </p>
+<pre class="highlight"><c- k>namespace</c-> <c- n>std</c-> <c- p>{</c->
+<c- k>namespace</c-> <c- n>experimental</c-> <c- p>{</c->
+<c- k>namespace</c-> <c- n>seminumeric</c-> <c- p>{</c->
+
+<c- d>/* class integer */</c->
+
+    <c- k>class</c-> <c- nc>integer</c-><c- p>;</c->
+    <c- k>class</c-> <c- nc>integer_data_proxy</c-><c- p>;</c->
+
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>swap</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// comparisons</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>==</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>!=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>&lt;</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>&lt;=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>></c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// arithmetic operations</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>+</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>-</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>*</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>/</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>%</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>std</c-><c- o>::</c-><c- n>pair</c-><c- o>&lt;</c-><c- n>integer</c-><c- p>,</c-> <c- n>integer</c-><c- o>></c-> <c- n>div</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>abs</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- c1>// numeric operations</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>sqr</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>sqrt</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>pow</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>mod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>mulmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>powmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>gcd</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>a</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>b</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>lcm</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>a</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>b</c-><c- p>);</c->
+
+
+    <c- c1>// conversions</c->
+    <c- n>std</c-><c- o>::</c-><c- n>string</c-> <c- n>to_string</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- b>int</c-> <c- n>radix</c-> <c- o>=</c-> <c- mi>10</c-><c- p>);</c->
+
+    <c- c1>// I/O operations</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c->
+            <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c->
+            <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>,</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+
+<c- d>/* class bits */</c->
+
+    <c- k>class</c-> <c- nc>bits</c-><c- p>;</c->
+
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>swap</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// logical operations</c->
+    <c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>&amp;</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>|</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>^</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- c1>// I/O operations</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c->
+            <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c->
+            <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>,</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+
+<c- p>}</c-> <c- d>/* namespace seminumeric */</c->
+<c- p>}</c-> <c- d>/* namespace experimental */</c->
+
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c-> <c- k>class</c-> <c- nc>numeric_limits</c-><c- p>;</c->
+<c- k>template</c-> <c- o>&lt;></c-> <c- k>class</c-> <c- nc>numeric_limits</c-><c- o>&lt;</c-><c- n>experimental</c-><c- o>::</c-><c- n>seminumeric</c-><c- o>::</c-><c- n>integer</c-><c- o>></c-><c- p>;</c->
+
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c-> <c- k>class</c-> <c- nc>hash</c-><c- p>;</c->
+<c- k>template</c-> <c- o>&lt;></c-> <c- k>class</c-> <c- nc>hash</c-><c- o>&lt;</c-><c- n>experimental</c-><c- o>::</c-><c- n>seminumeric</c-><c- o>::</c-><c- n>integer</c-><c- o>></c-><c- p>;</c->
+<c- k>template</c-> <c- o>&lt;></c-> <c- k>class</c-> <c- nc>hash</c-><c- o>&lt;</c-><c- n>experimental</c-><c- o>::</c-><c- n>seminumeric</c-><c- o>::</c-><c- n>bits</c-><c- o>></c-><c- p>;</c->
+
+<c- p>}</c-> <c- d>/* namespace std */</c->
+<c- n>Class</c-> <c- n>integer</c->
+<c- k>class</c-> <c- nc>integer</c-> <c- p>{</c->
+<c- k>public</c-><c- o>:</c->
+
+    <c- c1>// constructors</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c-> <c- c1>// arithmetic types only</c->
+
+    <c- k>constexpr</c-> <c- nf>integer</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>initializer_list</c-><c- o>&lt;</c-><c- b>uint_least32_t</c-><c- o>></c-> <c- n>init</c-><c- p>);</c->
+
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- n>integer</c-><c- p>(</c-><c- k>const</c-> <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- nf>integer</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- nf>integer</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- nf>integer</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- nf>integer</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// assign and swap</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>);</c->   <c- c1>// arithmetic types only</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>swap</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// conversions</c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- k>operator</c-> <c- b>long</c-> <c- nf>long</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- k>operator</c-> <c- b>unsigned</c-> <c- b>long</c-> <c- nf>long</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- k>operator</c-> <c- b>long</c-> <c- nf>double</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- k>operator</c-> <c- nf>bool</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// comparisons</c->
+    <c- k>constexpr</c-> <c- b>int</c-> <c- nf>compare</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// arithmetic operations</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>+=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>-=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>*=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>/=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>%=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>++</c-><c- p>();</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>++</c-><c- p>(</c-><c- b>int</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>--</c-><c- p>();</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>--</c-><c- p>(</c-><c- b>int</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- nf>div</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>abs</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>negate</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>+</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>-</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>>>=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- c1>// numeric operations</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>sqr</c-><c- p>();</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>sqrt</c-><c- p>();</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>pow</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>mod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>mulmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>powmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+
+    <c- c1>// observers</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- nf>is_zero</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- nf>is_odd</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// accessors</c->
+    <c- k>constexpr</c-> <c- n>integer_data_proxy</c-> <c- nf>get_data_proxy</c-><c- p>();</c->
+
+    <c- c1>// capacity</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>size</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>capacity</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>reserve</c-><c- p>(</c-><c- b>size_t</c-> <c- n>digits</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>shrink_to_fit</c-><c- p>();</c->
+<c- p>};</c->
+</pre>
+   <p>The class describes an object that manages an unbounded-precision signed integral type that can be used in most contexts where an int could be used.</p>
+   <p>Any function specified to return an object of type integer may return an object of another type, provided all the const member functions of the class integer are also applicable to that type.</p>
+   <p><strong>abs</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>abs</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>other</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>abs</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The first function returns an object that holds the absolute value of other. The second function sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to its absolute value and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>capacity</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>integer</c-><c- o>::</c-><c- n>capacity</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns the number of decimal digits that the object can represent without reallocating its internal storage. 
+   <p><strong>compare</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>int</c-> <c- n>integer</c-><c- o>::</c-><c- n>compare</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns a value less than 0 if <code class="highlight"><c- o>*</c-><c- k>this</c-></code> is less than rhs, 0 if <code class="highlight"><c- o>*</c-><c- k>this</c-></code> is equal to rhs, and greater than 0 if <code class="highlight"><c- o>*</c-><c- k>this</c-></code> is greater than rhs. 
+   <p><strong>div</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>std</c-><c- o>::</c-><c- n>pair</c-><c- o>&lt;</c-><c- n>integer</c-><c- p>,</c-> <c- n>integer</c-><c- o>></c-> <c- n>div</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-> <c- n>integer</c-><c- o>::</c-><c- n>div</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The first function returns an object that is an instantiation of <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>pair</c-></code>; its first field holds the quotient, <code class="highlight"><c- n>lhs</c-> <c- o>/</c-> <c- n>rhs</c-></code>, and its second field holds the remainder, <code class="highlight"><c- n>lhs</c-> <c- o>%</c-> <c- n>rhs</c-></code>. 
+   <p>The second function returns the remainder, <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>%</c-> <c- n>rhs</c-></code>, and stores the quotient, <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>/</c-> <c- n>rhs</c-></code>, into <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p><strong>gcd</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>gcd</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>a</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>b</c-><c- p>);</c->
+</pre>
+   The function returns an object whose value is the greatest common denominator of <code class="highlight"><c- n>a</c-></code> and <code class="highlight"><c- n>b</c-></code>. 
+   <p><strong>get_data_proxy</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer_data_proxy</c-> <c- n>integer</c-><c- o>::</c-><c- n>get_data_proxy</c-><c- p>();</c->
+</pre>
+   The member function returns an object of type <code class="highlight"><c- n>integer_data_proxy</c-></code> that can be used to examine and modify the internal storage of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. If an object of type <code class="highlight"><c- n>integer_data_proxy</c-></code> that refers to <code class="highlight"><c- o>*</c-><c- k>this</c-></code> exists at the time of a call to this function, the function throws an exception object of type <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>runtime_error</c-></code>. 
+   <p><strong>integer</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c-> <c- c1>// arithmetic types only</c->
+
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>initializer_list</c-><c- o>&lt;</c-><c- n>unspecified</c-><c- o>></c-> <c- n>list</c-><c- p>);</c->
+
+<c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-><c- o>></c->
+<c- k>constexpr</c-> <c- k>explicit</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- k>const</c-> <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>);</c->
+
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>::</c-><c- n>integer</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The default constructor constructs an object whose value is 0. 
+   <p>The template constructor with type argument Ty shall not take part in overload resolution unless the type Ty is an arithmetic type. For integral types the constructor constructs an object whose value is val. For floating-point types the constructor constructs an object whose value is the value of val with any fractional part discarded.</p>
+   <p>The constructor that takes a string constructs an object whose value is the value represented by the string object. The string object shall have the form required for the string argument to the function <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>strtol</c-></code> with a radix of base, and shall be interpreted as if by <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>strtol</c-><c- p>(</c-><c- n>str</c-><c- p>.</c-><c- n>c_str</c-><c- p>(),</c-> <c- mi>0</c-><c- p>,</c-> <c- n>base</c-><c- p>)</c-></code>, except that the resulting value can never be outside the range of representable values.</p>
+   <p>The constructor that takes an initializer_list constructs an object whose stored value is equal to the elements of the initializer_list treated as a series of unsigned 32-bit digits with the leftmost digit being most significant. For example, the initializer list { 0xFE, 0xF0, 0xAA, 0x31 } represents the value 0xFE * 323 + 0xF0 * 322 + 0xAA * 321 + 0x31 * 320.</p>
+   <p>The constructors that take an argument of type bits each construct an object whose stored value is the value in the bit pattern in rhs interpreted as a ones-complement representation of an integer value.</p>
+   <p>The copy and move constructors construct objects with the same value as rhs. The move constructor leaves rhs in an unspecified valid state.</p>
+   <p><strong>is_odd</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>integer</c-><c- o>::</c-><c- n>is_odd</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns true only if the stored value represents an odd number. 
+   <p><strong>is_zero</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>integer</c-><c- o>::</c-><c- n>is_zero</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns true only if the stored value is zero. 
+   <p><strong>lcm</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>lcm</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>a</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>b</c-><c- p>);</c->
+</pre>
+   The function returns an object whose value is the least common multiple of <code class="highlight"><c- n>a</c-></code> and <code class="highlight"><c- n>b</c-></code>. 
+   <p><strong>mod</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>mod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>mod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The non-member function returns an object whose value is lhs mod rhs. The member function sets the stored value in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- n>mod</c-> <c- n>rhs</c-></code> and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>mulmod</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>mulmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>mulmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+</pre>
+   The non-member function returns an object whose value is <code class="highlight"><c- p>(</c-><c- n>lhs</c-> <c- o>*</c-> <c- n>rhs</c-><c- p>)</c-> <c- n>mod</c-> <c- n>m</c-></code>. The member function sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to <code class="highlight"><c- p>(</c-><c- o>*</c-><c- k>this</c-> <c- o>*</c-> <c- n>rhs</c-><c- p>)</c-> <c- n>mod</c-> <c- n>m</c-></code> and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>negate</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>negate</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the negation of its previous vaue and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator=</strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>);</c->   <c- c1>// arithmetic types only</c->
+
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The template operator shall not take part in overload resolution unless the type <code class="highlight"><c- n>Ty</c-></code> is an arithmetic type. The operator effectively executes <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>=</c-> <c- n>integer</c-><c- p>(</c-><c- n>rhs</c-><c- p>)</c-></code>. 
+   <p>The next two operators store the value of <code class="highlight"><c- n>rhs</c-></code> into <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p>The last two operators store the value of <code class="highlight"><c- n>rhs</c-></code>, interpreted as a ones-complement representation of an integer value, into <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p>The operators all return <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p><strong>operator+</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>+</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>+</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The first operator returns an object whose value is the sum of the values of lhs and rhs. The second operator returns a copy of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator+=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>+=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The member operator sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the sum of the values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and rhs and returns a reference to <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator++</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>++</c-><c- p>();</c->
+<c- k>constexpr</c-> <c- n>integer</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>++</c-><c- p>(</c-><c- b>int</c-><c- p>);</c->
+</pre>
+   The member operators set the value stored in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to *this + 1. The first operator returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. The second operator returns an object whose value is the value stored in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> prior to the increment. 
+   <p><strong>operator-</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>-</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c->
+<c- k>constexpr</c-> <c- n>integer</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>-</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The first operator returns an object whose value is the difference between the values of lhs and rhs. The second operator returns an object whose value is the negation of the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator-=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>-=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-><c- p>);</c->
+</pre>
+   The member operator sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the difference between the values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and rhs and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator--</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>--</c-><c- p>();</c->
+<c- k>constexpr</c-> <c- n>integer</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>--</c-><c- p>(</c-><c- b>int</c-><c- p>);</c->
+</pre>
+   The member operators set the value stored in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>-</c-> <c- mi>1</c-></code>. The first operator returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. The second operator returns an object whose value is the value stored in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> prior to the decrement. 
+   <p><strong>operator</strong>*</p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>*</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is the product of the values of <code class="highlight"><c- n>lhs</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. 
+   <p>*<em>operator</em>=**</p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>*=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The member operator sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the product of the values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and rhs and returns a reference to <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator/</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>/</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is the quotient of the value of lhs divided by the value of <code class="highlight"><c- n>rhs</c-></code>, discarding any fractional part. 
+   <p><strong>operator/=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>/=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The member operator sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the quotient of the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> divided by the value of <code class="highlight"><c- n>rhs</c-></code>, discarding any fractional part, and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator%</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>%</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is the remainder of the value of lhs divided by the value of <code class="highlight"><c- n>rhs</c-></code>. The remainder is the value such that <code class="highlight"><c- p>(</c-><c- n>lhs</c-> <c- o>/</c-> <c- n>rhs</c-><c- p>)</c-> <c- o>*</c-> <c- n>rhs</c-> <c- o>+</c-> <c- n>lhs</c-> <c- o>%</c-> <c- n>rhs</c-></code> is equal to <code class="highlight"><c- n>lhs</c-></code>. 
+   <p><strong>operator%=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>%=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-><c- p>);</c->
+</pre>
+   The member operator sets the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the remainder of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> divided by the value of <code class="highlight"><c- n>rhs</c-></code> and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator>></strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is val / 2rhs. 
+   <p><strong>operator>>=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>>>=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>/</c-> <c- mi>2</c-><c- n>rhs</c-></code>. The operator returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator>></strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Elem</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+    <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>Elem</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>Elem</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>is</c-><c- p>,</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+</pre>
+   The operator has the effect of <code class="highlight"><c- p>{</c-> <c- n>std</c-><c- o>::</c-><c- n>string</c-> <c- n>temp</c-><c- p>;</c-> <c- n>is</c-> <c- o>>></c-> <c- n>temp</c-><c- p>;</c-> <c- n>val</c-> <c- o>=</c-> <c- n>integer</c-><c- p>(</c-><c- n>temp</c-><c- p>);</c-> <c- p>}</c-></code>. It returns <code class="highlight"><c- n>is</c-></code>. 
+   <p><strong>operator&lt;&lt;</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is val * 2rhs. 
+   <p><strong>operator&lt;&lt;=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-><c- o>&lt;&lt;=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator sets the value of <em>this to </em>this * 2rhs. The operator returns *this. 
+   <p><strong>operator&lt;&lt;</strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Elem</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+    <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>Elem</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>Elem</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>os</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+</pre>
+   The operator has the effect of <code class="highlight"><c- n>os</c-> <c- o>&lt;&lt;</c-> <c- n>to_string</c-><c- p>(</c-><c- n>val</c-><c- p>)</c-></code>. It returns <code class="highlight"><c- n>os</c-></code>. 
+   <p><strong>operator bool</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- k>explicit</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-> <c- b>bool</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns false only if *this is equal to 0. 
+   <p><strong>operator long double</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- k>explicit</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-> <c- b>long</c-> <c- b>double</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns a value equal to the stored value of *this. If the stored value is outside the range that can be represented by an object of type long double the returned value is positive or negative infinity, as appropriate. 
+   <p><strong>operator long long</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- k>explicit</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-> <c- b>long</c-> <c- b>long</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The operator returns a value equal to the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. If the stored value cannot be represented as a <code class="highlight"><c- b>long</c-> <c- b>long</c-></code> it throws an exception of type <code class="highlight"><c- n>range_error</c-></code>. 
+   <p><strong>operator unsigned long long</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- k>explicit</c-> <c- n>integer</c-><c- o>::</c-><c- k>operator</c-> <c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The operator returns a value equal to the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. If the stored value cannot be represented as an <code class="highlight"><c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-></code> it throws an exception of type <code class="highlight"><c- n>range_error</c-></code>. 
+   <p>It throws an exception of type <code class="highlight"><c- n>range_error</c-></code> if the value cannot be represented as an <code class="highlight"><c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-></code>. <strong>operator==</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>==</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns true only if the value stored in <code class="highlight"><c- n>lhs</c-></code> is equal to the value stored in <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>operator!=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>!=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns <code class="highlight"><c- o>!</c-><c- p>(</c-><c- n>lhs</c-> <c- o>==</c-> <c- n>rhs</c-><c- p>)</c-></code>. 
+   <p><strong>operator></strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>></c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns <code class="highlight"><c- n>rhs</c-> <c- o>&lt;</c-> <c- n>lhs</c-></code>. 
+   <p><strong>operator>=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns <code class="highlight"><c- o>!</c-><c- p>(</c-><c- n>lhs</c-> <c- o>&lt;</c-> <c- n>rhs</c-><c- p>)</c-></code>. 
+   <p><strong>operator&lt;</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>&lt;</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator return true only if <code class="highlight"><c- n>lhs</c-><c- p>.</c-><c- n>compare</c-><c- p>(</c-><c- n>rhs</c-><c- p>)</c-></code> returns -1. 
+   <p><strong>operator&lt;=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>&lt;=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The operator returns <code class="highlight"><c- o>!</c-><c- p>(</c-><c- n>rhs</c-> <c- o>&lt;</c-> <c- n>lhs</c-><c- p>)</c-></code>. 
+   <p><strong>pow</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>pow</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>pow</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>);</c->
+</pre>
+   The non-member function returns an object whose value is valexp. The member function sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to *thisexp and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. Requires: 0 &lt;= exp. 
+   <p><strong>powmod</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>powmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>powmod</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>exp</c-><c- p>,</c-> <c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>m</c-><c- p>);</c->
+</pre>
+   The non-member function returns an object whose value is valexp mod m. The member function sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to *thisexp mod m and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. Requires: 0 &lt;= exp and m != 0. 
+   <p><strong>reserve</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>integer</c-><c- o>::</c-><c- n>reserve</c-><c- p>(</c-><c- b>size_t</c-> <c- n>digits</c-><c- p>);</c->
+</pre>
+   The member function ensures that <code class="highlight"><c- n>capacity</c-><c- p>()</c-> <c- o>>=</c-> <c- n>digits</c-></code>. 
+   <p><strong>shrink_to_fit</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>integer</c-><c- o>::</c-><c- n>shrink_to_fit</c-><c- p>();</c->
+</pre>
+   The member function is a non-binding request to reduce <code class="highlight"><c- n>capacity</c-><c- p>()</c-></code> to hold the current stored value without wasted space. 
+   <p><strong>size</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>integer</c-><c- o>::</c-><c- n>size</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns <code class="highlight"><c- n>capacity</c-><c- p>()</c-></code>. 
+   <p><strong>sqr</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>sqr</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>sqr</c-><c- p>();</c->
+</pre>
+   The non-member function returns an object whose value is <code class="highlight"><c- n>val</c-> <c- o>*</c-> <c- n>val</c-></code>. The member function sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>*</c-> <c- o>*</c-><c- k>this</c-></code> and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>sqrt</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-> <c- nf>sqrt</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer</c-><c- o>::</c-><c- n>sqrt</c-><c- p>();</c->
+</pre>
+   The non-member function returns an object whose value is the square root of the value held by val, discarding any fractional part. Requires: <code class="highlight"><c- mi>0</c-> <c- o>&lt;=</c-> <c- n>val</c-></code>. The member function sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the square root of the value held by <code class="highlight"><c- o>*</c-><c- k>this</c-></code>, discarding any fractional part, and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. Requires: <code class="highlight"><c- mi>0</c-> <c- o>&lt;=</c-> <c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>swap</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- nf>swap</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- b>void</c-> <c- n>integer</c-><c- o>::</c-><c- n>swap</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The non-member function swaps the stored values of <code class="highlight"><c- n>lhs</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. The member function swaps the stored values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>to_string</strong></p>
+<pre class="highlight"><c- n>std</c-><c- o>::</c-><c- n>string</c-> <c- n>to_string</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>,</c-> <c- b>int</c-> <c- n>radix</c-> <c- o>=</c-> <c- mi>10</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The function returns a string representation of the value stored in <code class="highlight"><c- n>val</c-></code>, using <code class="highlight"><c- n>radix</c-></code> as the radix. 
+   <p><strong>Class integer_data_proxy</strong></p>
+<pre class="highlight"><c- k>class</c-> <c- nc>integer_data_proxy</c-> <c- p>{</c->
+
+    <c- c1>// type names</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>data_type</c-><c- p>;</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>arithmetic_type</c-><c- p>;</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>uarithmetic_type</c-><c- p>;</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>iterator</c-><c- p>;</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>const_iterator</c-><c- p>;</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>reverse_iterator</c-><c- p>;</c->
+    <c- k>typedef</c-> <c- n>unspecified</c-> <c- n>const_reverse_iterator</c-><c- p>;</c->
+
+    <c- c1>// constructors</c->
+    <c- k>constexpr</c-> <c- nf>integer_data_proxy</c-><c- p>(</c-><c- k>const</c-> <c- n>integer_data_proxy</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- o>=</c-> <c- k>delete</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- nf>integer_data_proxy</c-><c- p>(</c-><c- n>integer_data_proxy</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+    <c- c1>// assign</c->
+    <c- k>constexpr</c-> <c- n>integer_data_proxy</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer_data_proxy</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- o>=</c-> <c- k>delete</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>integer_data_proxy</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>integer_data_proxy</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- o>=</c-> <c- k>delete</c-><c- p>;</c->
+
+    <c- c1>// iterators</c->
+    <c- k>constexpr</c-> <c- n>iterator</c-> <c- nf>begin</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>iterator</c-> <c- nf>end</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>reverse_iterator</c-> <c- nf>rbegin</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>reverse_iterator</c-> <c- nf>rend</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>const_iterator</c-> <c- nf>cbegin</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>const_iterator</c-> <c- nf>cend</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>const_reverse_iterator</c-> <c- nf>crbegin</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>const_reverse_iterator</c-> <c- nf>crend</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// element access</c->
+    <c- k>constexpr</c-> <c- n>data_type</c-> <c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>data_type</c-><c- o>&amp;</c-> <c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+
+    <c- c1>// capacity</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>size</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>capacity</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>reserve</c-><c- p>(</c-><c- b>size_t</c-> <c- n>digits</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>shrink_to_fit</c-><c- p>();</c->
+<c- p>};</c->
+</pre>
+   The class describes an object that can be used to examine and modify the internal representation of an object of type integer. This allows advanced users to portably implement algorithms that are not provided natively. 
+   <p>There can be only one integer_data_proxy object associated with a particular integer object at any given time; that object is obtained by calling the <code class="highlight"><c- n>get_data_proxy</c-></code> member function on the integer object. The resulting object can be moved but not copied.</p>
+   <p><strong>arithmetic_type</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>arithmetic_type</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for a signed arithmetic type that is large enough to hold the product of the largest values that the implementation will store in an object of type data_type. 
+   <p><strong>begin</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>begin</c-><c- p>();</c->
+</pre>
+   The member function returns an iterator object such that the iterators [begin(), end()) point to the internal data elements of the integer object. 
+   <p><strong>capacity</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>capacity</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns the number of decimal digits that the integer object can represent without reallocating its internal storage. 
+   <p><strong>cbegin</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>const_iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>cbegin</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns an iterator object such that the iterator range [cbegin(), cend()) points to the internal data elements of the integer object. 
+   <p><strong>cend</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>const_iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>cend</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns an iterator object such that the iterator range [cbegin(), cend()) points to the internal data elements of the integer object. 
+   <p><strong>const_iterator</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>const_iterator</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for an iterator that can be used to access but not modify internal data elements of the integer object. 
+   <p><strong>const_reverse_iterator</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>const_reverse_iterator</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for a reverse iterator that can be used to access but not modify internal data elements of the integer object. 
+   <p><strong>crbegin</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>const_reverse_iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>crbegin</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns a reverse iterator object such that the iterator range [crbegin(), crend()) points to the internal data elements of the integer object in reverse order. 
+   <p><strong>crend</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>const_reverse_iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>crend</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns a reverse iterator object such that the iterator range [crbegin(), crend()) points to the internal data elements of the integer object in reverse order. 
+   <p><strong>data_type</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>data_type</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for the type of the integer object’s internal data elements. 
+   <p><strong>end</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>end</c-><c- p>();</c->
+</pre>
+   The member function returns an iterator object such that the iterator range [begin(), end()) points to the internal data elements of the integer object. 
+   <p><strong>integer_data_proxy</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>integer_data_proxy</c-><c- p>(</c-><c- k>const</c-> <c- n>integer_data_proxy</c-><c- o>&amp;</c-><c- p>)</c-> <c- o>=</c-> <c- k>delete</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>integer_data_proxy</c-><c- p>(</c-><c- n>integer_data_proxy</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The copy constructor is deleted. The move constructor copies the contents of rhs and leaves rhs in an unspecified valid state. 
+   <p><strong>iterator</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>iterator</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for an iterator that can be used to access internal data elements of the integer object. 
+   <p><strong>operator=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer_data_proxy</c-><c- o>&amp;</c-><c- p>)</c-> <c- o>=</c-> <c- k>delete</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>integer_data_proxy</c-><c- o>&amp;&amp;</c-><c- p>)</c-> <c- o>=</c-> <c- k>delete</c-><c- p>;</c->
+</pre>
+   The copy assignment and move assignment operators are deleted. 
+   <p><strong>operator[]</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>data_type</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- n>data_type</c-><c- o>&amp;</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+</pre>
+   The first member function returns the value of the internal data element at index pos. The second member function returns a reference to the internal data element at index pos. 
+   <p><strong>rbegin</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>reverse_iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>rbegin</c-><c- p>();</c->
+</pre>
+   The member function returns a reverse iterator object such that the iterator range [crbegin(), crend()) points to the internal data elements of the integer object in reverse order. 
+   <p><strong>rend</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>reverse_iterator</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>rend</c-><c- p>();</c->
+</pre>
+   The member function returns a reverse iterator object such that the iterator range [crbegin(), crend()) points to the internal data elements of the integer object in reverse order. 
+   <p><strong>reserve</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>reserve</c-><c- p>(</c-><c- b>size_t</c-> <c- n>digits</c-><c- p>);</c->
+</pre>
+   The member function ensures that <code class="highlight"><c- n>capacity</c-><c- p>()</c-> <c- o>>=</c-> <c- n>digits</c-></code>. 
+   <p><strong>reverse_iterator</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>reverse_iterator</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for a reverse iterator that can be used to access internal data elements of the integer object. 
+   <p><strong>shrink_to_fit</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>shrink_to_fit</c-><c- p>();</c->
+</pre>
+   The member function is a non-binding request to reduce <code class="highlight"><c- n>capacity</c-><c- p>()</c-></code> to hold the integer object’s current stored value without wasted space. 
+   <p><strong>size</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>integer_data_proxy</c-><c- o>::</c-><c- n>size</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns <code class="highlight"><c- n>capacity</c-><c- p>()</c-></code>. 
+   <p><strong>uarithmetic_type</strong></p>
+<pre class="highlight"><c- k>typedef</c-> <c- n>unspecified</c-> <c- nl>integer_data</c-><c- p>:</c-><c- n>proxy</c-><c- o>::</c-><c- n>uarithmetic_type</c-><c- p>;</c->
+</pre>
+   The typedef defines a synonym for an unsigned arithmetic type that is large enough to hold the product of the largest values that the implementation will store in an object of type data_type. 
+   <p><strong>Class bits</strong></p>
+<pre class="highlight"><c- k>class</c-> <c- nc>bits</c-> <c- p>{</c->
+<c- k>public</c-><c- o>:</c->
+
+    <c- k>class</c-> <c- nc>reference</c-><c- p>;</c->
+
+    <c- c1>// constructors</c->
+    <c- k>constexpr</c-> <c- nf>bits</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->    <c- c1>// integral types only</c->
+
+    <c- k>constexpr</c-> <c- nf>bits</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>initializer_list</c-><c- o>&lt;</c-><c- b>uint_least32_t</c-><c- o>></c-> <c- n>list</c-><c- p>);</c->
+
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- n>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>,</c->
+        <c- k>typename</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>::</c-><c- b>size_t</c-> <c- n>pos</c-> <c- o>=</c-> <c- mi>0</c-><c- p>,</c->
+        <c- k>typename</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>::</c-><c- b>size_t</c-> <c- n>count</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>>::</c-><c- n>npos</c-><c- p>,</c->
+        <c- n>CharT</c-> <c- n>zero</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'0'</c-><c- p>),</c->
+        <c- n>CharT</c-> <c- n>one</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'1'</c-><c- p>));</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- n>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>CharT</c-> <c- o>*</c-><c- n>ptr</c-><c- p>,</c->
+        <c- k>typename</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>>::</c-><c- b>size_t</c-> <c- n>count</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>>::</c-><c- n>npos</c-><c- p>,</c->
+        <c- n>CharT</c-> <c- n>zero</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'0'</c-><c- p>),</c->
+        <c- n>CharT</c-> <c- n>one</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'1'</c-><c- p>));</c->
+
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- nf>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- k>explicit</c-> <c- nf>bits</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>val</c-><c- p>);</c->
+
+    <c- k>constexpr</c-> <c- nf>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- nf>bits</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// assign and swap</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>);</c-> <c- c1>// integral types only</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>swap</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// conversions</c->
+    <c- k>constexpr</c-> <c- b>unsigned</c-> <c- b>long</c-> <c- nf>to_ulong</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-> <c- nf>to_ullong</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-> <c- o>=</c-> <c- b>char</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>char_traits</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>></c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>allocator</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>></c-> <c- o>></c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>></c-> <c- n>to_string</c-><c- p>(</c-><c- n>CharT</c-> <c- n>zero</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'0'</c-><c- p>),</c-> <c- n>CharT</c-> <c- n>one</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'1'</c-><c- p>))</c-> <c- k>const</c-><c- p>;</c->
+
+    <c- c1>// logical operations</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>&amp;=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>|=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>^=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>~</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>>>=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+
+    <c- c1>// element access and modification</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>set</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>set</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>,</c-> <c- b>bool</c-> <c- n>val</c-> <c- o>=</c-> true<c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>reset</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>reset</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>flip</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>flip</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- n>reference</c-> <c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- nf>test</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- nf>all</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- nf>any</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- nf>none</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>count</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>count_not_set</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// comparison</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>==</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>!=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+
+    <c- c1>// capacity</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>size</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>size_t</c-> <c- nf>capacity</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>reserve</c-><c- p>(</c-><c- b>size_t</c-> <c- n>bit_count</c-><c- p>);</c->
+    <c- k>constexpr</c-> <c- b>void</c-> <c- nf>shrink_to_fit</c-><c- p>();</c->
+
+<c- p>};</c->
+</pre>
+   The class describes an object that represents an unbounded set of bits. 
+   <p><strong>all</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- n>all</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c->
+</pre>
+   The member function returns true only if all the bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> are set. 
+   <p><strong>any</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- n>any</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c->
+</pre>
+   The member function returns true if at least one of the bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> is set. 
+   <p><strong>bits</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->    <c- c1>// integral types only</c->
+
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- n>std</c-><c- o>::</c-><c- n>initializer_list</c-><c- o>&lt;</c-><c- b>uint_least32_t</c-><c- o>></c-> <c- n>list</c-><c- p>);</c->
+
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-><c- o>></c->
+<c- k>constexpr</c-> <c- k>explicit</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>&amp;</c-> <c- n>str</c-><c- p>,</c->
+    <c- k>typename</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>::</c-><c- b>size_t</c-> <c- n>pos</c-> <c- o>=</c-> <c- mi>0</c-><c- p>,</c->
+    <c- k>typename</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>>::</c-><c- b>size_t</c-> <c- n>count</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>>::</c-><c- n>npos</c-><c- p>,</c->
+    <c- n>CharT</c-> <c- n>zero</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'0'</c-><c- p>),</c->
+    <c- n>CharT</c-> <c- n>one</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'1'</c-><c- p>));</c->
+<c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- o>></c->
+<c- k>constexpr</c-> <c- k>explicit</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>CharT</c-> <c- o>*</c-><c- n>ptr</c-><c- p>,</c->
+    <c- k>typename</c-> <c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>>::</c-><c- b>size_t</c-> <c- n>count</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>>::</c-><c- n>npos</c-><c- p>,</c->
+    <c- n>CharT</c-> <c- n>zero</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'0'</c-><c- p>),</c->
+    <c- n>CharT</c-> <c- n>one</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'1'</c-><c- p>));</c->
+
+<c- k>constexpr</c-> <c- k>explicit</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- k>explicit</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>::</c-><c- n>bits</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The default constructor constructs an object whose value is 0. 
+   <p>The template constructor with type argument <code class="highlight"><c- n>Ty</c-></code> shall not take part in overload resolution unless the type <code class="highlight"><c- n>Ty</c-></code> is an integral type. It constructs an object whose value is the ones-complement representation of <code class="highlight"><c- n>rhs</c-></code>.</p>
+   <p>The constructor that takes an <code class="highlight"><c- n>initializer_list</c-></code> constructs an object whose stored value is equal to the elements of the <code class="highlight"><c- n>initializer_list</c-></code> treated as a series of unsigned 32-bit digits with the leftmost digit being most significant. For example, the <code class="highlight"><c- n>initializer</c-> <c- n>list</c-> <c- p>{</c-> <c- mh>0xFE</c-><c- p>,</c-> <c- mh>0xF0</c-><c- p>,</c-> <c- mh>0xAA</c-><c- p>,</c-> <c- mh>0x31</c-> <c- p>}</c-></code> represents the value <code class="highlight"><c- mh>0xFE</c-> <c- o>*</c-> <c- mi>323</c-> <c- o>+</c-> <c- mh>0xF0</c-> <c- o>*</c-> <c- mi>322</c-> <c- o>+</c-> <c- mh>0xAA</c-> <c- o>*</c-> <c- mi>321</c-> <c- o>+</c-> <c- mh>0x31</c-> <c- o>*</c-> <c- mi>320</c-></code>.</p>
+   <p>The constructors that take <code class="highlight"><c- n>string</c-></code> and <code class="highlight"><c- k>const</c-> <c- b>char</c-><c- o>*</c-></code> objects construct an object whose value is the value represented by their argument, treating zero as 0 and one as 1.</p>
+   <p>The constructors that take an argument of type integer construct objects whose value is the ones-complement representation of rhs.</p>
+   <p>The copy and move constructors construct objects with the same value as <code class="highlight"><c- n>rhs</c-></code>. The move constructor leaves <code class="highlight"><c- n>rhs</c-></code> in an unspecified valid state.</p>
+   <p><strong>capacity</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>bits</c-><c- o>::</c-><c- n>capacity</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns the number of bits that the object can represent without reallocating its internal storage. 
+   <p><strong>count</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>bits</c-><c- o>::</c-><c- n>count</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns the number of bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> that are set, or <code class="highlight"><c- k>static_cast</c-><c- o>&lt;</c-><c- b>size_t</c-><c- o>></c-><c- p>(</c-><c- o>-</c-><c- mi>1</c-><c- p>)</c-></code> if the number of bits that are set is too large to fit in an object of type <code class="highlight"><c- b>size_t</c-></code>. 
+   <p><strong>count_not_set</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>bits</c-><c- o>::</c-><c- n>count_not_set</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns the number of bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> that are not set, or <code class="highlight"><c- k>static_cast</c-><c- o>&lt;</c-><c- b>size_t</c-><c- o>></c-><c- p>(</c-><c- o>-</c-><c- mi>1</c-><c- p>)</c-></code> if the number of bits that are not set is too large to fit in an object of type <code class="highlight"><c- b>size_t</c-></code>. 
+   <p><strong>flip</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>flip</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>flip</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+</pre>
+   The first member function toggles all the bits in the stored value. The second member function toggles the bit at position pos in the stored value. 
+   <p><strong>none</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- n>none</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns true only if none of the bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> is set. 
+   <p><strong>operator=</strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>Ty</c-><c- o>></c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>Ty</c-> <c- n>rhs</c-><c- p>);</c->   <c- c1>// integral types only</c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>integer</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- n>integer</c-><c- o>&amp;&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The template operator shall not take part in overload resolution unless the type <code class="highlight"><c- n>Ty</c-></code> is an arithmetic type. The operator effectively executes <code class="highlight"><c- o>*</c-><c- k>this</c-> <c- o>=</c-> <c- n>integer</c-><c- p>(</c-><c- n>rhs</c-><c- p>)</c-></code>. 
+   <p>The next two operators store the value of rhs into <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p>The last two operators store the ones-complement representation of rhs into <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p>All of the operators return <code class="highlight"><c- o>*</c-><c- k>this</c-></code>.</p>
+   <p><strong>operator==</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>==</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member operator returns true only if the stored value in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> is the same as the stored value in <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>operator!=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>!=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member operator returns <code class="highlight"><c- o>!</c-><c- p>(</c-><c- o>*</c-><c- k>this</c-> <c- o>==</c-> <c- n>rhs</c-><c- p>)</c-></code>. 
+   <p><strong>operator&amp;</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>&amp;</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is the bitwise AND of the values of <code class="highlight"><c- n>lhs</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>operator&amp;=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>&amp;=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The member operator sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the bitwise AND of the values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and rhs and returns a reference to <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator|</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>|</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is the bitwise inclusive OR of the values of <code class="highlight"><c- n>lhs</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>operator|=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>|=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The member operator sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the bitwise inclusive OR of the values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and <code class="highlight"><c- n>rhs</c-></code> and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator^</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>^</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose value is the bitwise exclusive OR of the values of <code class="highlight"><c- n>lhs</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>operator^=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>^=</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The member operator sets the value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the bitwise exclusive OR of the values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and rhs and returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator~</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>~</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns an object that holds the complement of the set of bits held by <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator>></strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose stored value is the value of the bits in <code class="highlight"><c- n>lhs</c-></code> shifted right <code class="highlight"><c- n>rhs</c-></code> positions. 
+   <p><strong>operator>>=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>>>=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator sets the stored value in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the value of the bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> shifted right <code class="highlight"><c- n>rhs</c-></code> positions. It returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator>></strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+    <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>>></c-><c- p>(</c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_istream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>is</c-><c- p>,</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+</pre>
+   The operator has the effect of <code class="highlight"><c- p>{</c-> <c- n>std</c-><c- o>::</c-><c- n>string</c-> <c- n>temp</c-><c- p>;</c-> <c- n>is</c-> <c- o>>></c-> <c- n>temp</c-><c- p>;</c-> <c- n>val</c-> <c- o>=</c-> <c- n>temp</c-><c- p>;</c-> <c- p>}</c-></code>. It returns <code class="highlight"><c- n>is</c-></code>. 
+   <p><strong>operator&lt;&lt;</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c-><c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator returns an object whose stored value is the value of the bits in <code class="highlight"><c- n>lhs</c-></code> shifted left <code class="highlight"><c- n>rhs</c-></code> positions. 
+   <p><strong>operator&lt;&lt;=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- o>&lt;&lt;=</c-><c- p>(</c-><c- b>size_t</c-> <c- n>rhs</c-><c- p>);</c->
+</pre>
+   The operator sets the stored value in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> to the value of the bits in <code class="highlight"><c- o>*</c-><c- k>this</c-></code> shifted left <code class="highlight"><c- n>rhs</c-></code> positions. It returns <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>operator&lt;&lt;</strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-><c- o>></c->
+    <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- k>operator</c-><c- o>&lt;&lt;</c-><c- p>(</c->
+        <c- n>std</c-><c- o>::</c-><c- n>basic_ostream</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- o>>&amp;</c-> <c- n>os</c-><c- p>,</c-> <c- k>const</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>val</c-><c- p>);</c->
+</pre>
+   The operator has the effect of <code class="highlight"><c- n>os</c-> <c- o>&lt;&lt;</c-> <c- n>val</c-><c- p>.</c-><c- n>to_string</c-><c- p>()</c-></code> and returns <code class="highlight"><c- n>os</c-></code>. 
+   <p><strong>operator[]</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>)</c-> <c- k>const</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- n>reference</c-> <c- n>bits</c-><c- o>::</c-><c- k>operator</c-><c- p>[](</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+</pre>
+   The first member function returns the value of the bit at position <code class="highlight"><c- n>pos</c-></code>. The second member function returns an object of type <code class="highlight"><c- n>bits</c-><c- o>::</c-><c- n>reference</c-></code> that refers to the bit at position <code class="highlight"><c- n>pos</c-></code>. 
+   <p><strong>reserve</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>reserve</c-><c- p>(</c-><c- b>size_t</c-> <c- n>bit_count</c-><c- p>);</c->
+</pre>
+   The member function ensures that <code class="highlight"><c- n>capacity</c-><c- p>()</c-> <c- o>>=</c-> <c- n>bit_count</c-></code>. 
+   <p><strong>reset</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- n>reset</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- n>reset</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>);</c->
+</pre>
+   The first member function clears all the bits of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. The second member function clears the bit as position <code class="highlight"><c- n>pos</c-></code>. Both member functions return <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>set</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>set</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>set</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>,</c-> <c- b>bool</c-> <c- n>val</c-> <c- o>=</c-> true<c- p>);</c->
+</pre>
+   The first member function sets all the bits of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. The second member function sets the bit at position <code class="highlight"><c- n>pos</c-></code> in the stored value to <code class="highlight"><c- n>val</c-></code>. Both member functions return <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. 
+   <p><strong>shrink_to_fit</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>shrink_to_fit</c-><c- p>();</c->
+</pre>
+   The member function is a non-binding request to reduce <code class="highlight"><c- n>capacity</c-><c- p>()</c-></code> to hold the current stored value without wasted space. 
+   <p><strong>size</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>size_t</c-> <c- n>bits</c-><c- o>::</c-><c- n>size</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns <code class="highlight"><c- n>capacity</c-><c- p>()</c-></code>. 
+   <p><strong>swap</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>void</c-> <c- nf>swap</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;</c-> <c- n>lhs</c-><c- p>,</c-> <c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- b>void</c-> <c- n>bits</c-><c- o>::</c-><c- n>swap</c-><c- p>(</c-><c- n>bits</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The non-member function swaps the stored values of <code class="highlight"><c- n>lhs</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. The member function swaps the stored values of <code class="highlight"><c- o>*</c-><c- k>this</c-></code> and <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>test</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- n>test</c-><c- p>(</c-><c- b>size_t</c-> <c- n>pos</c-><c- p>)</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function returns true only if the bit at position pos in the stored value is non-zero. 
+   <p><strong>to_string</strong></p>
+<pre class="highlight"><c- k>template</c-> <c- o>&lt;</c-><c- k>class</c-> <c- nc>CharT</c-> <c- o>=</c-> <c- b>char</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Traits</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>char_traits</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>></c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-> <c- o>=</c-> <c- n>std</c-><c- o>::</c-><c- n>allocator</c-><c- o>&lt;</c-><c- n>CharT</c-><c- o>></c-> <c- o>></c->
+    <c- n>std</c-><c- o>::</c-><c- n>basic_string</c-><c- o>&lt;</c-><c- n>CharT</c-><c- p>,</c-> <c- n>Traits</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>></c-> <c- n>bits</c-><c- o>::</c-><c- n>to_string</c-><c- p>(</c->
+        <c- n>CharT</c-> <c- n>zero</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'0'</c-><c- p>),</c-> <c- n>CharT</c-> <c- n>one</c-> <c- o>=</c-> <c- n>CharT</c-><c- p>(</c-><c- sc>'1'</c-><c- p>));</c->
+</pre>
+   The member function returns a string representation of the bits in the value stored in <code class="highlight"><c- o>*</c-><c- k>this</c-></code>, using zero to represent 0 and one to represent 1. 
+   <p><strong>to_ullong</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-> <c- n>bits</c-><c- o>::</c-><c- n>to_ullong</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns a value equal to the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. It throws an exception of type <code class="highlight"><c- n>range_error</c-></code> if the value cannot be represented as an <code class="highlight"><c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-></code>. 
+   <p><strong>to_ulong</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>unsigned</c-> <c- b>long</c-> <c- n>bits</c-><c- o>::</c-><c- n>to_ulong</c-><c- p>()</c-> <c- k>const</c-><c- p>;</c->
+</pre>
+   The member function returns a value equal to the stored value of <code class="highlight"><c- o>*</c-><c- k>this</c-></code>. It throws an exception of type <code class="highlight"><c- n>range_error</c-></code> if the value cannot be represented as a <code class="highlight"><c- b>long</c-> <c- b>long</c-></code>. 
+   <p><strong>Class bits::reference</strong></p>
+<pre class="highlight"><c- k>class</c-> <c- nc>bits</c-> <c- p>{</c->
+    <c- k>class</c-> <c- nc>reference</c-> <c- p>{</c->
+    <c- k>public</c-><c- o>:</c->
+        <c- k>constexpr</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- b>bool</c-> <c- n>val</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+        <c- k>constexpr</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+        <c- k>constexpr</c-> <c- b>bool</c-> <c- k>operator</c-><c- o>~</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+        <c- k>constexpr</c-> <c- k>operator</c-> <c- nf>bool</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+        <c- k>constexpr</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- n>flip</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+    <c- p>};</c->
+<c- p>};</c->
+</pre>
+   The nested class bits::reference describes an object that can be used to manage a particular bit in an object of type <code class="highlight"><c- n>bits</c-></code>. 
+   <p><strong>flip</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- n>reference</c-><c- o>::</c-><c- n>flip</c-><c- p>()</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member function toggles the bit that the object manages. 
+   <p><strong>operator=</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- n>reference</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- b>bool</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+<c- k>constexpr</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- n>bits</c-><c- o>::</c-><c- n>reference</c-><c- o>::</c-><c- k>operator</c-><c- o>=</c-><c- p>(</c-><c- k>const</c-> <c- n>reference</c-><c- o>&amp;</c-> <c- n>rhs</c-><c- p>)</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The first member operator sets the bit that the object manages to the value of <code class="highlight"><c- n>rhs</c-></code>. The second member operator sets the bit that the object manages to the value managed by <code class="highlight"><c- n>rhs</c-></code>. 
+   <p><strong>operator~</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- b>bool</c-> <c- n>bits</c-><c- o>::</c-><c- n>reference</c-><c- o>::</c-><c- k>operator</c-><c- o>~</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member operator returns true if the bit managed by the object is set, otherwise false. 
+   <p><strong>operator bool</strong></p>
+<pre class="highlight"><c- k>constexpr</c-> <c- n>bits</c-><c- o>::</c-><c- n>reference</c-><c- o>::</c-><c- k>operator</c-> <c- b>bool</c-><c- p>()</c-> <c- k>const</c-> <c- k>noexcept</c-><c- p>;</c->
+</pre>
+   The member operator returns true if the bit that the object manages is set. 
+   <h2 class="heading settled" data-level="6" id="impl"><span class="secno">6. </span><span class="content">Possible implementation</span><a class="self-link" href="#impl"></a></h2>
+   <p>Some possible implementations can be found in <a href="http://www.boost.org/doc/libs/1_68_0/doc/html/hash/reference.html#header.boost.functional.hash_hpp" title="Boost.Hash">Boost.Hash</a> library.</p>
+   <h2 class="heading settled" data-level="7" id="other_lang"><span class="secno">7. </span><span class="content">Other programming languages</span><a class="self-link" href="#other_lang"></a></h2>
+   <p>Python has built-in support for unbounded integer arithmetic from the beginning.</p>
+   <p>Java</p>
+   <p>C#</p>
+   <p>Rust</p>
+   <h2 class="heading settled" data-level="8" id="references"><span class="secno">8. </span><span class="content">References</span><a class="self-link" href="#references"></a></h2>
+   <p><a href="http://www.boost.org/doc/libs/1_68_0/doc/html/hash/reference.html#header.boost.functional.hash_hpp" title="Boost.Hash">Boost.Hash</a></p>
+  </main>
+<script>
+(function() {
+  "use strict";
+  var collapseSidebarText = '<span aria-hidden="true">←</span> '
+                          + '<span>Collapse Sidebar</span>';
+  var expandSidebarText   = '<span aria-hidden="true">→</span> '
+                          + '<span>Pop Out Sidebar</span>';
+  var tocJumpText         = '<span aria-hidden="true">↑</span> '
+                          + '<span>Jump to Table of Contents</span>';
+
+  var sidebarMedia = window.matchMedia('screen and (min-width: 78em)');
+  var autoToggle   = function(e){ toggleSidebar(e.matches) };
+  if(sidebarMedia.addListener) {
+    sidebarMedia.addListener(autoToggle);
+  }
+
+  function toggleSidebar(on) {
+    if (on == undefined) {
+      on = !document.body.classList.contains('toc-sidebar');
+    }
+
+    /* Don’t scroll to compensate for the ToC if we’re above it already. */
+    var headY = 0;
+    var head = document.querySelector('.head');
+    if (head) {
+      // terrible approx of "top of ToC"
+      headY += head.offsetTop + head.offsetHeight;
+    }
+    var skipScroll = window.scrollY < headY;
+
+    var toggle = document.getElementById('toc-toggle');
+    var tocNav = document.getElementById('toc');
+    if (on) {
+      var tocHeight = tocNav.offsetHeight;
+      document.body.classList.add('toc-sidebar');
+      document.body.classList.remove('toc-inline');
+      toggle.innerHTML = collapseSidebarText;
+      if (!skipScroll) {
+        window.scrollBy(0, 0 - tocHeight);
+      }
+      tocNav.focus();
+      sidebarMedia.addListener(autoToggle); // auto-collapse when out of room
+    }
+    else {
+      document.body.classList.add('toc-inline');
+      document.body.classList.remove('toc-sidebar');
+      toggle.innerHTML = expandSidebarText;
+      if (!skipScroll) {
+        window.scrollBy(0, tocNav.offsetHeight);
+      }
+      if (toggle.matches(':hover')) {
+        /* Unfocus button when not using keyboard navigation,
+           because I don’t know where else to send the focus. */
+        toggle.blur();
+      }
+    }
+  }
+
+  function createSidebarToggle() {
+    /* Create the sidebar toggle in JS; it shouldn’t exist when JS is off. */
+    var toggle = document.createElement('a');
+      /* This should probably be a button, but appearance isn’t standards-track.*/
+    toggle.id = 'toc-toggle';
+    toggle.class = 'toc-toggle';
+    toggle.href = '#toc';
+    toggle.innerHTML = collapseSidebarText;
+
+    sidebarMedia.addListener(autoToggle);
+    var toggler = function(e) {
+      e.preventDefault();
+      sidebarMedia.removeListener(autoToggle); // persist explicit off states
+      toggleSidebar();
+      return false;
+    }
+    toggle.addEventListener('click', toggler, false);
+
+
+    /* Get <nav id=toc-nav>, or make it if we don’t have one. */
+    var tocNav = document.getElementById('toc-nav');
+    if (!tocNav) {
+      tocNav = document.createElement('p');
+      tocNav.id = 'toc-nav';
+      /* Prepend for better keyboard navigation */
+      document.body.insertBefore(tocNav, document.body.firstChild);
+    }
+    /* While we’re at it, make sure we have a Jump to Toc link. */
+    var tocJump = document.getElementById('toc-jump');
+    if (!tocJump) {
+      tocJump = document.createElement('a');
+      tocJump.id = 'toc-jump';
+      tocJump.href = '#toc';
+      tocJump.innerHTML = tocJumpText;
+      tocNav.appendChild(tocJump);
+    }
+
+    tocNav.appendChild(toggle);
+  }
+
+  var toc = document.getElementById('toc');
+  if (toc) {
+    createSidebarToggle();
+    toggleSidebar(sidebarMedia.matches);
+
+    /* If the sidebar has been manually opened and is currently overlaying the text
+       (window too small for the MQ to add the margin to body),
+       then auto-close the sidebar once you click on something in there. */
+    toc.addEventListener('click', function(e) {
+      if(e.target.tagName.toLowerCase() == "a" && document.body.classList.contains('toc-sidebar') && !sidebarMedia.matches) {
+        toggleSidebar(false);
+      }
+    }, false);
+  }
+  else {
+    console.warn("Can’t find Table of Contents. Please use <nav id='toc'> around the ToC.");
+  }
+
+  /* Wrap tables in case they overflow */
+  var tables = document.querySelectorAll(':not(.overlarge) > table.data, :not(.overlarge) > table.index');
+  var numTables = tables.length;
+  for (var i = 0; i < numTables; i++) {
+    var table = tables[i];
+    var wrapper = document.createElement('div');
+    wrapper.className = 'overlarge';
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+  }
+
+})();
+</script>
