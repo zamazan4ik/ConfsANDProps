@@ -119,13 +119,16 @@ All of these `std::hash` specializations (except specializations for `std::forwa
 
 The main reason to enable additional `std::hash` specializations is allowing to end-user use complex keys in unordered containers.
 
-Another reason is simplifying to end-user writing own `std::hash` specializations for complex types which can consist of different STL containers.
+Another reason is simplifying to end-user writing own `std::hash` specializations for complex types which can consist of different STL containers. For now at first user shall write own hash for STL containers and only after this write hash for own structure.
 
-From my observations we haven't any limitations which can influence on an implementation in Standard Library.
+From my observations we haven't any limitations which can influence on an implementation in Standard Library or break backward compatibility with existing codebases.
 
 Examples {#examples}
 ========================
 
+Motivating examples
+```
+```
 Possible implementation {#impl}
 ========================
 
